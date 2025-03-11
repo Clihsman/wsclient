@@ -23,28 +23,12 @@ mvn clean install
 ```
 
 ## Usage
-### 1. Validate a message input
+### 1. Send Message
 
 ```java
-String recipient = "1234567890";
-Text text = new Text("Hello, this is a test message.");
-WhatsAppException exception = WhatsAppClientValidator.validateMessageInput(recipient, text);
-
-if (exception != null) {
-    throw exception;
-}
-```
-
-### 2. Validate an interactive message
-
-```java
-String recipient = "1234567890";
-Interactive interactiveMessage = new Interactive(InteractiveType.BUTTON, action);
-WhatsAppException exception = WhatsAppClientValidator.validateInteractiveInput(recipient, interactiveMessage);
-
-if (exception != null) {
-    throw exception;
-}
+ WhatsAppClient client = new WhatsAppClient();
+ Text textMessage = new Text("Hello, this is a test message!");
+ client.sendMessage("+1234567890", textMessage);
 ```
 
 ## Building the JAR
