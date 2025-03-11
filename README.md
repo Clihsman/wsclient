@@ -28,7 +28,7 @@ mvn clean install
 ```java
  WhatsAppClient client = new WhatsAppClient();
  Text textMessage = new Text("Hello, this is a test message!");
- client.sendMessage("+1234567890", textMessage);
+ client.sendMessage("1234567890", textMessage);
 ```
 
 ## Building the JAR
