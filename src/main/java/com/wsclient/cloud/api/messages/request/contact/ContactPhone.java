@@ -2,6 +2,13 @@ package com.wsclient.cloud.api.messages.request.contact;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
+/**
+ * ContactPhone
+ * 
+ * @param phone phone
+ * @param type  type
+ * @param ws_id ws_id
+ */
 public record ContactPhone(
         /**
          * <strong>
@@ -35,12 +42,29 @@ public record ContactPhone(
          * </p>
          */
         String ws_id) {
+    /**
+     * ContactPhoneType
+     */
     public enum ContactPhoneType {
-
+        /**
+         * CELL
+         */
         CELL("CELL"),
+        /**
+         * MAIN
+         */
         MAIN("MAIN"),
+        /**
+         * IPHONE
+         */
         IPHONE("IPHONE"),
+        /**
+         * HOME
+         */
         HOME("HOME"),
+        /**
+         * WORK
+         */
         WORK("WORK");
 
         private final String value;
@@ -49,6 +73,11 @@ public record ContactPhone(
             this.value = value;
         }
 
+        /**
+         * getValue
+         * 
+         * @return value
+         */
         @JsonValue
         public String getValue() {
             return value;

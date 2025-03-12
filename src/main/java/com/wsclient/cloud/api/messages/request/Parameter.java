@@ -7,6 +7,13 @@ import lombok.Builder;
 
 /**
  * The Parameter Object contains the following fields
+ * 
+ * @param type     type
+ * @param text     text
+ * @param currency currency
+ * @param dateTime dateTime
+ * @param image    image
+ * @param document document
  */
 @Builder
 public record Parameter(
@@ -93,11 +100,30 @@ public record Parameter(
          * Only PDF documents are supported for media-based message templates.
          */
         Media document) {
+
+    /**
+     * ParameterType
+     */
     public enum ParameterType {
+        /**
+         * TEXT
+         */
         TEXT("text"),
+        /**
+         * CURRENCY
+         */
         CURRENCY("currency"),
+        /**
+         * DATETIME
+         */
         DATETIME("date_time"),
+        /**
+         * IMAGE
+         */
         IMAGE("image"),
+        /**
+         * DOCUMENT
+         */
         DOCUMENT("document");
 
         private final String value;
@@ -106,6 +132,11 @@ public record Parameter(
             this.value = value;
         }
 
+        /**
+         * getValue
+         * 
+         * @return value
+         */
         @JsonValue
         public String getValue() {
             return value;

@@ -6,6 +6,9 @@ import lombok.Builder;
 
 /**
  * The Components Object contains the following fields
+ * 
+ * @param type       type
+ * @param parameters parameters
  */
 @Builder
 public record Component(
@@ -30,9 +33,21 @@ public record Component(
          * </p>
          */
         Parameter parameters) {
+    /**
+     * ComponentType
+     */
     public enum ComponentType {
+        /**
+         * HEADER
+         */
         HEADER("header"),
+        /**
+         * BODY
+         */
         BODY("body"),
+        /**
+         * BUTTON
+         */
         BUTTON("button");
 
         private final String value;
@@ -41,6 +56,11 @@ public record Component(
             this.value = value;
         }
 
+        /**
+         * getValue
+         * 
+         * @return value
+         */
         @JsonValue
         public String getValue() {
             return value;

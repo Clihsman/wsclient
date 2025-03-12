@@ -14,12 +14,22 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+/**
+ * WhatsAppServiceImpl
+ */
 public class WhatsAppServiceImpl implements WhatsAppService {
     private String whatsappApiUrl;
     private String phoneNumberId;
     private String token;
 
-    private final HttpClient httpClient = HttpClient.newHttpClient();
+    private final HttpClient httpClient;
+
+    /**
+     * WhatsAppServiceImplcls
+     */
+    public WhatsAppServiceImpl() {
+        httpClient = HttpClient.newHttpClient();
+    }
 
     /**
      * Configures the WhatsApp API credentials and endpoint URL.
@@ -30,7 +40,6 @@ public class WhatsAppServiceImpl implements WhatsAppService {
      * @param phoneNumberId  The ID of the phone number associated with the WhatsApp
      *                       account.
      * @param token          The authentication token for API access.
-     * @throws WhatsAppException If any of the input parameters are invalid.
      */
     public void configureWhatsAppApi(String whatsappApiUrl, String phoneNumberId, String token) {
         this.whatsappApiUrl = whatsappApiUrl;
@@ -47,7 +56,6 @@ public class WhatsAppServiceImpl implements WhatsAppService {
      * @return A WhatsAppResponse object containing the API response.
      * @throws IOException          If an I/O error occurs during the HTTP request.
      * @throws InterruptedException If the operation is interrupted.
-     * @throws WhatsAppException    If the API response contains an error.
      */
     public WhatsAppResponse sendRequest(Map<String, Object> data)
             throws IOException, InterruptedException, WhatsAppException {

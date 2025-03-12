@@ -1,6 +1,5 @@
 package com.wsclient.cloud.api.messages.service;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -10,8 +9,6 @@ import com.wsclient.cloud.api.messages.request.Template;
 import com.wsclient.cloud.api.messages.request.Text;
 import com.wsclient.cloud.api.messages.request.interactive.Interactive;
 import com.wsclient.cloud.api.messages.response.WhatsAppResponse;
-
-import lombok.RequiredArgsConstructor;
 
 import static com.wsclient.cloud.api.validators.WhatsAppInputValidator.*;
 
@@ -38,9 +35,17 @@ import static com.wsclient.cloud.api.validators.WhatsAppInputValidator.*;
  * @version 1.0
  * @since 2025-03-10
  */
-@RequiredArgsConstructor
 public class WhatsAppClientImpl implements WhatsAppClient {
     private final WhatsAppService whatsAppService;
+
+    /**
+     * WhatsAppClientImpl
+     * 
+     * @param whatsAppService whatsAppService
+     */
+    public WhatsAppClientImpl(WhatsAppService whatsAppService) {
+        this.whatsAppService = whatsAppService;
+    }
 
     /**
      * Configures the WhatsApp API credentials and endpoint URL.
@@ -51,7 +56,6 @@ public class WhatsAppClientImpl implements WhatsAppClient {
      * @param phoneNumberId  The ID of the phone number associated with the WhatsApp
      *                       account.
      * @param token          The authentication token for API access.
-     * @throws WhatsAppException
      */
     public void configureWhatsAppApi(String whatsappApiUrl, String phoneNumberId, String token) {
         whatsAppService.configureWhatsAppApi(whatsappApiUrl, phoneNumberId, token);
@@ -86,10 +90,10 @@ public class WhatsAppClientImpl implements WhatsAppClient {
     }
 
     /**
-     * Sends a WhatsApp text message to a specified recipient.
+     * Sends a WhatsApp interactive message to a specified recipient.
      *
-     * @param to   The recipient's phone number in international format.
-     * @param text The text message to send.
+     * @param to          The recipient's phone number in international format.
+     * @param interactive The interactive message to send.
      * @return A WhatsAppResponse object containing the API response.
      */
     public CompletableFuture<WhatsAppResponse> sendInteractiveAsync(String to, Interactive interactive) {
@@ -120,8 +124,7 @@ public class WhatsAppClientImpl implements WhatsAppClient {
      * @param template The template object containing the message structure.
      * @return A WhatsAppResponse object containing the API response.
      */
-    public CompletableFuture<WhatsAppResponse> sendTemplate(String to, Template template)
-            throws IOException, InterruptedException, WhatsAppException {
+    public CompletableFuture<WhatsAppResponse> sendTemplate(String to, Template template) {
         Map<String, Object> data = Map.of(
                 "messaging_product", "whatsapp",
                 "recipient_type", "individual",

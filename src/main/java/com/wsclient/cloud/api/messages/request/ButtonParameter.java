@@ -2,6 +2,9 @@ package com.wsclient.cloud.api.messages.request;
 
 /**
  * The Button Parameter Object contains the following fields
+ * @param type type
+ * @param payload payload
+ * @param text text
  */
 public record ButtonParameter(
         /**

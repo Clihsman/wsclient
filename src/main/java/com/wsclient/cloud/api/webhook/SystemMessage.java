@@ -6,6 +6,12 @@ import com.fasterxml.jackson.annotation.JsonValue;
 /**
  * This object is added to Webhooks if a user has changed their phone number and
  * if a user’s identity has potentially changed on WhatsApp.
+ * 
+ * @param body     body
+ * @param newWaId  newWaId
+ * @param identity identity
+ * @param type     type
+ * @param user     user
  */
 public record SystemMessage(
         /**
@@ -53,6 +59,9 @@ public record SystemMessage(
          * </p>
          */
         String user) {
+    /**
+     * SystemMessageType
+     */
     public enum SystemMessageType {
         /**
          * for a user changed number notification.
@@ -69,6 +78,11 @@ public record SystemMessage(
             this.value = value;
         }
 
+        /**
+         * getValue
+         * 
+         * @return value
+         */
         @JsonValue
         public String getValue() {
             return value;

@@ -6,6 +6,9 @@ import java.util.Map;
 import com.wsclient.cloud.api.exceptions.WhatsAppException;
 import com.wsclient.cloud.api.messages.response.WhatsAppResponse;
 
+/**
+ * WhatsAppService
+ */
 public interface WhatsAppService {
 
     /**

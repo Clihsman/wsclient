@@ -6,6 +6,23 @@ import com.fasterxml.jackson.annotation.JsonValue;
  * The messages array of objects is nested within the Value object and is
  * triggered when a customer updates their profile information or a customer
  * sends a message to the business that is subscribed to the Webhook.
+ * 
+ * @param from        from
+ * @param id          id
+ * @param timestamp   timestamp
+ * @param type        type
+ * @param context     context
+ * @param identity    identity
+ * @param text        text
+ * @param audio       audio
+ * @param image       image
+ * @param sticker     sticker
+ * @param document    document
+ * @param video       video
+ * @param interactive interactive
+ * @param system      system
+ * @param button      button
+ * @param referral    referral
  */
 public record Messages(
         /**
@@ -245,6 +262,11 @@ public record Messages(
             this.value = value;
         }
 
+        /**
+         * getValue
+         * 
+         * @return value
+         */
         @JsonValue
         public String getValue() {
             return value;

@@ -43,6 +43,13 @@ import static com.wsclient.cloud.api.constants.WhatsAppConstants.*;
 public final class WhatsAppInputValidator {
 
     /**
+     * 
+     */
+    private WhatsAppInputValidator() {
+
+    }
+
+    /**
      * Validates the input parameters for sending a WhatsApp message.
      *
      * @param to   The recipient's phone number as a string. It must contain only
@@ -50,7 +57,6 @@ public final class WhatsAppInputValidator {
      * @param text The text object containing the message body.
      * @return A {@link WhatsAppException} if any validation fails; otherwise,
      *         returns {@code null}.
-     * @throws WhatsAppException If any of the input parameters are invalid.
      */
     public static WhatsAppException validateMessageInput(String to, Text text) {
 
@@ -97,7 +103,6 @@ public final class WhatsAppInputValidator {
      *                    and actions.
      * @return A {@link WhatsAppException} if any validation fails; otherwise,
      *         returns {@code null}.
-     * @throws WhatsAppException If any of the input parameters are invalid.
      */
     public static WhatsAppException validateInteractiveInput(String to, Interactive interactive) {
         if (Objects.isNull(to)) {

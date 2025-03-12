@@ -7,6 +7,15 @@ import lombok.Builder;
 
 /**
  * The DateTime Object contains the following fields
+ * 
+ * @param fallbackValue fallbackValue
+ * @param dayOfWeek     dayOfWeek
+ * @param yaer          yaer
+ * @param month         month
+ * @param dayOfMonth    dayOfMonth
+ * @param hour          hour
+ * @param minute        minute
+ * @param calendar      calendar
  */
 @Builder
 public record DateTime(
@@ -80,17 +89,42 @@ public record DateTime(
          * The type of calendar.
          * </p>
          * <p>
-         * <strong>Values</strong>: <code>"GREGORIAN"</code> or <code>"SOLAR_HIJRI"</code>.
+         * <strong>Values</strong>: <code>"GREGORIAN"</code> or
+         * <code>"SOLAR_HIJRI"</code>.
          * </p>
          */
         DateTimeCalendar calendar) {
+    /**
+     * DateTimeDayOfWeek
+     */
     public enum DateTimeDayOfWeek {
+        /**
+         * MONDAY
+         */
         MONDAY("MONDAY"),
+        /**
+         * TUESDAY
+         */
         TUESDAY("TUESDAY"),
+        /**
+         * WEDNESDAY
+         */
         WEDNESDAY("WEDNESDAY"),
+        /**
+         * THURSDAY
+         */
         THURSDAY("THURSDAY"),
+        /**
+         * FRIDAY
+         */
         FRIDAY("FRIDAY"),
+        /**
+         * SATURDAY
+         */
         SATURDAY("SATURDAY"),
+        /**
+         * SUNDAY
+         */
         SUNDAY("SUNDAY");
 
         private final String value;
@@ -99,14 +133,28 @@ public record DateTime(
             this.value = value;
         }
 
+        /**
+         * getValue
+         * 
+         * @return value
+         */
         @JsonValue
         public String getValue() {
             return value;
         }
     }
 
+    /**
+     * DateTimeCalendar
+     */
     public enum DateTimeCalendar {
+        /**
+         * GREGORIAN
+         */
         GREGORIAN("GREGORIAN"),
+        /**
+         * SOLAR_HIJRI
+         */
         SOLAR_HIJRI("SOLAR_HIJRI");
 
         private final String value;
@@ -115,6 +163,11 @@ public record DateTime(
             this.value = value;
         }
 
+        /**
+         * getValue
+         * 
+         * @return value
+         */
         @JsonValue
         public String getValue() {
             return value;

@@ -2,6 +2,15 @@ package com.wsclient.cloud.api.messages.request.interactive;
 
 import com.fasterxml.jackson.annotation.JsonValue;
 
+/**
+ * InteractiveHeader
+ * 
+ * @param type     type
+ * @param text     text
+ * @param video    video
+ * @param image    image
+ * @param document document
+ */
 public record InteractiveHeader(
         /**
          * <strong>
@@ -68,10 +77,25 @@ public record InteractiveHeader(
          * </p>
          */
         InteractiveMedia document) {
+    /**
+     * InteractiveHeaderType
+     */
     public enum InteractiveHeaderType {
+        /**
+         * TEXT
+         */
         TEXT("text"),
+        /**
+         * VIDEO
+         */
         VIDEO("video"),
+        /**
+         * IMAGE
+         */
         IMAGE("image"),
+        /**
+         * DOCUMENT
+         */
         DOCUMENT("document");
 
         private final String value;
@@ -80,6 +104,11 @@ public record InteractiveHeader(
             this.value = value;
         }
 
+        /**
+         * getValue
+         * 
+         * @return value
+         */
         @JsonValue
         public String getValue() {
             return value;

@@ -1,9 +1,7 @@
 package com.wsclient.cloud.api.messages.service;
 
-import java.io.IOException;
 import java.util.concurrent.CompletableFuture;
 
-import com.wsclient.cloud.api.exceptions.WhatsAppException;
 import com.wsclient.cloud.api.messages.request.Template;
 import com.wsclient.cloud.api.messages.request.Text;
 import com.wsclient.cloud.api.messages.request.interactive.Interactive;
@@ -43,7 +41,6 @@ public interface WhatsAppClient {
          * @param phoneNumberId  The ID of the phone number associated with the WhatsApp
          *                       account.
          * @param token          The authentication token for API access.
-         * @throws WhatsAppException
          */
         public void configureWhatsAppApi(String whatsappApiUrl, String phoneNumberId, String token);
 
@@ -57,10 +54,10 @@ public interface WhatsAppClient {
         public CompletableFuture<WhatsAppResponse> sendMessageAsync(String to, Text text);
 
         /**
-         * Sends a WhatsApp text message to a specified recipient.
+         * Sends a WhatsApp interactive message to a specified recipient.
          *
          * @param to   The recipient's phone number in international format.
-         * @param text The text message to send.
+         * @param interactive The interactive message to send.
          * @return A WhatsAppResponse object containing the API response.
          */
         public CompletableFuture<WhatsAppResponse> sendInteractiveAsync(String to, Interactive interactive);
@@ -72,7 +69,6 @@ public interface WhatsAppClient {
          * @param template The template object containing the message structure.
          * @return A WhatsAppResponse object containing the API response.
          */
-        public CompletableFuture<WhatsAppResponse> sendTemplate(String to, Template template)
-                        throws IOException, InterruptedException, WhatsAppException;
+        public CompletableFuture<WhatsAppResponse> sendTemplate(String to, Template template);
 
 }

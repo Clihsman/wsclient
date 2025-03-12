@@ -1,5 +1,13 @@
 package com.wsclient.cloud.api.messages.request;
 
+/**
+ * Location
+ * 
+ * @param longitude longitude
+ * @param latitude  latitude
+ * @param name      name
+ * @param address   address
+ */
 public record Location(
         /**
          * <strong>

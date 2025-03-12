@@ -3,6 +3,13 @@ package com.wsclient.cloud.api.webhook;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 
+/**
+ * Interactive
+ * 
+ * @param type        type
+ * @param buttonReply buttonReply
+ * @param listReply   listReply
+ */
 public record Interactive(
         /**
          * Contains the type of interactive object. Supported options are:
@@ -52,6 +59,11 @@ public record Interactive(
             this.value = value;
         }
 
+        /**
+         * getValue
+         * 
+         * @return value
+         */
         @JsonValue
         public String getValue() {
             return value;

@@ -7,6 +7,12 @@ import com.fasterxml.jackson.annotation.JsonValue;
  * The <code>statuses</code> object informs you of the status of messages
  * between you, users,
  * and/or groups.
+ * 
+ * @param id          id
+ * @param recipientId recipientId
+ * @param status      status
+ * @param timestamp   timestamp
+ * @param type        type
  */
 public record Statuses(
         /**
@@ -39,11 +45,29 @@ public record Statuses(
          * </p>
          */
         String type) {
+    /**
+     * Status
+     */
     public enum Status {
+        /**
+         * READ
+         */
         READ("read"),
+        /**
+         * DELIVERED
+         */
         DELIVERED("delivered"),
+        /**
+         * SENT
+         */
         SENT("sent"),
+        /**
+         * FAILED
+         */
         FAILED("failed"),
+        /**
+         * DELETED
+         */
         DELETED("deleted");
 
         private final String value;
@@ -52,6 +76,11 @@ public record Statuses(
             this.value = value;
         }
 
+        /**
+         * getValue
+         * 
+         * @return value
+         */
         @JsonValue
         public String getValue() {
             return value;

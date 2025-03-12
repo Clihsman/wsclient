@@ -18,9 +18,14 @@ import lombok.Builder;
  * </li>
  * <li>
  * Inside <code>action</code>, you can nest section and button objects.
- * <ul>
  * </li>
  * </ul>
+ * 
+ * @param type   type
+ * @param header header
+ * @param body   body
+ * @param footer footer
+ * @param action action
  */
 @Builder
 public record Interactive(
@@ -143,10 +148,25 @@ public record Interactive(
          * </p>
          */
         InteractiveAction action) {
+    /**
+     * InteractiveType
+     */
     public enum InteractiveType {
+        /**
+         * LIST
+         */
         LIST("list"),
+        /**
+         * BUTTON
+         */
         BUTTON("button"),
+        /**
+         * PRODUCT
+         */
         PRODUCT("product"),
+        /**
+         * PRODUCT_LIST
+         */
         PRODUCT_LIST("product");
 
         private final String value;
@@ -155,6 +175,11 @@ public record Interactive(
             this.value = value;
         }
 
+        /**
+         * getValue
+         * 
+         * @return value
+         */
         @JsonValue
         public String getValue() {
             return value;

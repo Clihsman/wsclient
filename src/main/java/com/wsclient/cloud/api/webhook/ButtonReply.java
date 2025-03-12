@@ -1,13 +1,19 @@
 package com.wsclient.cloud.api.webhook;
 
+/**
+ * ButtonReply
+ * 
+ * @param id    id
+ * @param title title
+ */
 public record ButtonReply(
-        /**
-         * The unique identifier of the button.
-         */
-        String id,
-        /**
-         * The title of the button.
-         */
-        String title) {
+                /**
+                 * The unique identifier of the button.
+                 */
+                String id,
+                /**
+                 * The title of the button.
+                 */
+                String title) {
 
 }
