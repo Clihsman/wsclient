@@ -31,7 +31,7 @@ import com.wsclient.cloud.api.messages.response.WhatsAppResponse;
  * @since 2025-03-10
  */
 public interface WhatsAppClient {
-        
+
         /**
          * Configures the WhatsApp API credentials and endpoint URL.
          * This method initializes the necessary parameters for interacting with the
@@ -56,7 +56,7 @@ public interface WhatsAppClient {
         /**
          * Sends a WhatsApp interactive message to a specified recipient.
          *
-         * @param to   The recipient's phone number in international format.
+         * @param to          The recipient's phone number in international format.
          * @param interactive The interactive message to send.
          * @return A WhatsAppResponse object containing the API response.
          */
@@ -70,5 +70,22 @@ public interface WhatsAppClient {
          * @return A WhatsAppResponse object containing the API response.
          */
         public CompletableFuture<WhatsAppResponse> sendTemplate(String to, Template template);
+
+        /**
+         * Marks a WhatsApp message as read.
+         * <p>
+         * This method sends a request to the WhatsApp API to update the status of a
+         * message,
+         * marking it as "read". This is useful for acknowledging received messages in
+         * an
+         * automated system.
+         * </p>
+         *
+         * @param messageId The unique identifier of the message to be marked as read.
+         * @return A {@link CompletableFuture} containing a {@link WhatsAppResponse}
+         *         with the API's response.
+         *         The future completes when the request is processed.
+         */
+        public CompletableFuture<WhatsAppResponse> markMessageAsRead(String messageId);
 
 }

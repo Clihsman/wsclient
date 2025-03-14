@@ -26,7 +26,7 @@ import static com.wsclient.cloud.api.validators.WhatsAppInputValidator.*;
  * {@code
  * WhatsAppClient client = new WhatsAppClient();
  * Text textMessage = new Text("Hello, this is a test message!");
- * client.sendMessage("+1234567890", textMessage);
+ * client.sendMessage("1234567890", textMessage);
  * }
  * </pre>
  *
@@ -56,6 +56,7 @@ public class WhatsAppClientImpl implements WhatsAppClient {
      *                       account.
      * @param token          The authentication token for API access.
      */
+    @Override
     public void configureWhatsAppApi(String whatsappApiUrl, String phoneNumberId, String token) {
         whatsAppService.configureWhatsAppApi(whatsappApiUrl, phoneNumberId, token);
     }
@@ -67,6 +68,7 @@ public class WhatsAppClientImpl implements WhatsAppClient {
      * @param text The text message to send.
      * @return A WhatsAppResponse object containing the API response.
      */
+    @Override
     public CompletableFuture<WhatsAppResponse> sendMessageAsync(String to, Text text) {
 
         validateMessageInput(to, text);
@@ -92,6 +94,7 @@ public class WhatsAppClientImpl implements WhatsAppClient {
      * @param interactive The interactive message to send.
      * @return A WhatsAppResponse object containing the API response.
      */
+    @Override
     public CompletableFuture<WhatsAppResponse> sendInteractiveAsync(String to, Interactive interactive) {
         validateInteractiveInput(to, interactive);
 
@@ -117,6 +120,7 @@ public class WhatsAppClientImpl implements WhatsAppClient {
      * @param template The template object containing the message structure.
      * @return A WhatsAppResponse object containing the API response.
      */
+    @Override
     public CompletableFuture<WhatsAppResponse> sendTemplate(String to, Template template) {
         Map<String, Object> data = Map.of(
                 "messaging_product", "whatsapp",
@@ -124,6 +128,37 @@ public class WhatsAppClientImpl implements WhatsAppClient {
                 "to", to,
                 "type", "template",
                 "template", template);
+
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                return whatsAppService.sendRequest(data);
+            } catch (Exception e) {
+                throw new CompletionException(e);
+            }
+        });
+    }
+
+    /**
+     * Marks a WhatsApp message as read.
+     * <p>
+     * This method sends a request to the WhatsApp API to update the status of a
+     * message,
+     * marking it as "read". This is useful for acknowledging received messages in
+     * an
+     * automated system.
+     * </p>
+     *
+     * @param messageId The unique identifier of the message to be marked as read.
+     * @return A {@link CompletableFuture} containing a {@link WhatsAppResponse}
+     *         with the API's response.
+     *         The future completes when the request is processed.
+     */
+    @Override
+    public CompletableFuture<WhatsAppResponse> markMessageAsRead(String messageId) {
+        Map<String, Object> data = Map.of(
+                "messaging_product", "whatsapp",
+                "status", "read",
+                "message_id", messageId);
 
         return CompletableFuture.supplyAsync(() -> {
             try {
