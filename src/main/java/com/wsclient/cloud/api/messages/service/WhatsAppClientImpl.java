@@ -4,7 +4,6 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
-import com.wsclient.cloud.api.exceptions.WhatsAppException;
 import com.wsclient.cloud.api.messages.request.Template;
 import com.wsclient.cloud.api.messages.request.Text;
 import com.wsclient.cloud.api.messages.request.interactive.Interactive;
@@ -70,10 +69,7 @@ public class WhatsAppClientImpl implements WhatsAppClient {
      */
     public CompletableFuture<WhatsAppResponse> sendMessageAsync(String to, Text text) {
 
-        WhatsAppException exception = validateMessageInput(to, text);
-        if (exception != null) {
-            return CompletableFuture.failedFuture(exception);
-        }
+        validateMessageInput(to, text);
 
         Map<String, Object> data = Map.of(
                 "messaging_product", "whatsapp",
@@ -84,7 +80,7 @@ public class WhatsAppClientImpl implements WhatsAppClient {
             try {
                 return whatsAppService.sendRequest(data);
             } catch (Exception e) {
-                throw new CompletionException(new WhatsAppException("Request failed", e));
+                throw new CompletionException(e);
             }
         });
     }
@@ -97,10 +93,7 @@ public class WhatsAppClientImpl implements WhatsAppClient {
      * @return A WhatsAppResponse object containing the API response.
      */
     public CompletableFuture<WhatsAppResponse> sendInteractiveAsync(String to, Interactive interactive) {
-        WhatsAppException exception = validateInteractiveInput(to, interactive);
-        if (exception != null) {
-            return CompletableFuture.failedFuture(exception);
-        }
+        validateInteractiveInput(to, interactive);
 
         Map<String, Object> data = Map.of(
                 "messaging_product", "whatsapp",
@@ -112,7 +105,7 @@ public class WhatsAppClientImpl implements WhatsAppClient {
             try {
                 return whatsAppService.sendRequest(data);
             } catch (Exception e) {
-                throw new CompletionException(new WhatsAppException("Request failed", e));
+                throw new CompletionException(e);
             }
         });
     }
@@ -136,7 +129,7 @@ public class WhatsAppClientImpl implements WhatsAppClient {
             try {
                 return whatsAppService.sendRequest(data);
             } catch (Exception e) {
-                throw new CompletionException(new WhatsAppException("Request failed", e));
+                throw new CompletionException(e);
             }
         });
     }

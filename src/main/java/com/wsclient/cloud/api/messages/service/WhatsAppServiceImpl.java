@@ -8,6 +8,7 @@ import java.net.http.HttpResponse;
 import java.util.Map;
 
 import com.wsclient.cloud.api.exceptions.WhatsAppException;
+import com.wsclient.cloud.api.messages.request.Error;
 import com.wsclient.cloud.api.messages.response.WhatsAppResponse;
 import com.wsclient.cloud.api.validators.ConfigValidator;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -15,7 +16,45 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
- * WhatsAppServiceImpl
+ * Implementation of the {@link WhatsAppService} interface.
+ * <p>
+ * This class provides the concrete implementation for interacting with the
+ * WhatsApp API,
+ * handling operations such as sending messages, retrieving conversations, and
+ * processing received messages.
+ * </p>
+ *
+ * <p>
+ * <b>Responsibilities:</b>
+ * </p>
+ * <ul>
+ * <li>Integrate with the WhatsApp API.</li>
+ * <li>Process incoming and outgoing messages.</li>
+ * <li>Handle API responses and potential errors.</li>
+ * </ul>
+ *
+ * <p>
+ * <b>Usage:</b> This class should be used as a service component in the
+ * application,
+ * implementing the necessary business logic for WhatsApp communication.
+ * </p>
+ */
+/**
+ * Implementation of the {@link WhatsAppService} interface.
+ * <p>
+ * This class provides functionality for interacting with the WhatsApp API,
+ * including:
+ * <ul>
+ * <li>Configuring API credentials.</li>
+ * <li>Sending HTTP requests to the API.</li>
+ * <li>Processing API responses.</li>
+ * </ul>
+ * </p>
+ *
+ * <p>
+ * <b>Usage:</b> This class should be instantiated and configured before making
+ * API requests.
+ * </p>
  */
 public class WhatsAppServiceImpl implements WhatsAppService {
     private String whatsappApiUrl;
@@ -25,7 +64,11 @@ public class WhatsAppServiceImpl implements WhatsAppService {
     private final HttpClient httpClient;
 
     /**
-     * WhatsAppServiceImplcls
+     * Initializes a new instance of {@code WhatsAppServiceImpl}.
+     * <p>
+     * This constructor initializes an {@link HttpClient} instance for making HTTP
+     * requests.
+     * </p>
      */
     public WhatsAppServiceImpl() {
         httpClient = HttpClient.newHttpClient();
@@ -33,8 +76,11 @@ public class WhatsAppServiceImpl implements WhatsAppService {
 
     /**
      * Configures the WhatsApp API credentials and endpoint URL.
+     * <p>
      * This method initializes the necessary parameters for interacting with the
      * WhatsApp API.
+     * It also validates the configuration parameters using {@link ConfigValidator}.
+     * </p>
      *
      * @param whatsappApiUrl The base URL of the WhatsApp API.
      * @param phoneNumberId  The ID of the phone number associated with the WhatsApp
@@ -51,11 +97,15 @@ public class WhatsAppServiceImpl implements WhatsAppService {
 
     /**
      * Sends an HTTP request to the WhatsApp API with the provided request data.
+     * <p>
+     * This method creates an HTTP request, sends it, and processes the response.
+     * </p>
      *
      * @param data The request payload as a key-value map.
-     * @return A WhatsAppResponse object containing the API response.
+     * @return A {@link WhatsAppResponse} object containing the API response.
      * @throws IOException          If an I/O error occurs during the HTTP request.
      * @throws InterruptedException If the operation is interrupted.
+     * @throws WhatsAppException    If the API response indicates an error.
      */
     public WhatsAppResponse sendRequest(Map<String, Object> data)
             throws IOException, InterruptedException, WhatsAppException {
@@ -66,9 +116,14 @@ public class WhatsAppServiceImpl implements WhatsAppService {
 
     /**
      * Creates an HTTP request object with the given request body.
+     * <p>
+     * This method serializes the request body to JSON and constructs an
+     * {@link HttpRequest}
+     * with the appropriate headers and authentication token.
+     * </p>
      *
      * @param body The request payload as a key-value map.
-     * @return An HttpRequest object ready to be sent.
+     * @return An {@link HttpRequest} object ready to be sent.
      * @throws JsonProcessingException If there is an error serializing the request
      *                                 body.
      */
@@ -85,21 +140,29 @@ public class WhatsAppServiceImpl implements WhatsAppService {
 
     /**
      * Parses the response from the WhatsApp API and converts it into a
-     * WhatsAppResponse object.
+     * {@link WhatsAppResponse} object.
+     * <p>
+     * If the API response contains an error status code, a
+     * {@link WhatsAppException} is thrown.
+     * </p>
      *
      * @param response The HTTP response from the WhatsApp API.
-     * @return A WhatsAppResponse object containing the API response data.
+     * @return A {@link WhatsAppResponse} object containing the API response data.
      * @throws JsonProcessingException If there is an error parsing the response
      *                                 JSON.
      * @throws WhatsAppException       If the response contains an error status
      *                                 code.
-     * @throws JsonMappingException
+     * @throws JsonMappingException    If the response JSON structure is invalid.
      */
     private WhatsAppResponse getWhatsAppResponse(HttpResponse<String> response)
             throws WhatsAppException, JsonMappingException, JsonProcessingException {
+        final ObjectMapper objectMapper = new ObjectMapper();
+        final String body = response.body();
         if (response.statusCode() != 200) {
-            throw new WhatsAppException("WhatsApp API error: " + response.body());
+            Error error = objectMapper.readValue(body, Error.class);
+            throw new WhatsAppException(error.message(), error.type(), error.code(), error.errorSubcode(),
+                    error.fbtraceId());
         }
-        return new ObjectMapper().readValue(response.body(), WhatsAppResponse.class);
+        return objectMapper.readValue(response.body(), WhatsAppResponse.class);
     }
 }

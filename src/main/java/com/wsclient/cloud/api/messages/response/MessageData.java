@@ -8,5 +8,5 @@ package com.wsclient.cloud.api.messages.response;
  *
  * @param id The unique identifier of the message.
  */
-public record MessageData(String id) {
+public record MessageData(String waId) {
 }

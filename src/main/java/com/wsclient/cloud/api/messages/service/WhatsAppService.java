@@ -7,7 +7,24 @@ import com.wsclient.cloud.api.exceptions.WhatsAppException;
 import com.wsclient.cloud.api.messages.response.WhatsAppResponse;
 
 /**
- * WhatsAppService
+ * Service interface for handling WhatsApp-related operations.
+ * <p>
+ * This interface defines the contract for implementing services that interact
+ * with the WhatsApp API, such as sending messages, retrieving conversations,
+ * and processing received messages.
+ * </p>
+ *
+ * <p>
+ * Implementations of this interface should handle the necessary API calls and
+ * data processing
+ * to facilitate seamless communication with WhatsApp.
+ * </p>
+ *
+ * <p>
+ * <b>Usage:</b> A class implementing this interface should provide concrete
+ * implementations
+ * for WhatsApp messaging functionalities.
+ * </p>
  */
 public interface WhatsAppService {
 
