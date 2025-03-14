@@ -1,10 +1,12 @@
 package com.wsclient.cloud.api.messages.response;
 
 /**
- * MessageData
- * 
- * @param id id
+ * Represents a message entry in the WhatsApp API response.
+ * <p>
+ * This record holds the unique identifier of a sent message.
+ * </p>
+ *
+ * @param id The unique identifier of the message.
  */
-public record MessageData(
-                String id) {
+public record MessageData(String id) {
 }
