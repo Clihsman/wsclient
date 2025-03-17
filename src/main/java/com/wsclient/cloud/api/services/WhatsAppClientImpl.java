@@ -38,9 +38,10 @@ public class WhatsAppClientImpl implements WhatsAppClient {
     private final WhatsAppService whatsAppService;
 
     /**
-     * WhatsAppClientImpl
-     * 
-     * @param whatsAppService whatsAppService
+     * Constructor for {@code WhatsAppClientImpl}.
+     * Initializes the client with the provided WhatsApp service.
+     *
+     * @param whatsAppService The service used to interact with the WhatsApp API.
      */
     public WhatsAppClientImpl(WhatsAppService whatsAppService) {
         this.whatsAppService = whatsAppService;
