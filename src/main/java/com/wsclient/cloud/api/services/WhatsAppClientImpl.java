@@ -71,7 +71,10 @@ public class WhatsAppClientImpl implements WhatsAppClient {
     @Override
     public CompletableFuture<WhatsAppResponse> sendMessageAsync(String to, Text text) {
 
-        validateMessageInput(to, text);
+        final IllegalArgumentException exception = validateMessageInput(to, text);
+        if (exception != null) {
+            return CompletableFuture.failedFuture(exception);
+        }
 
         Map<String, Object> data = Map.of(
                 "messaging_product", "whatsapp",
@@ -96,7 +99,11 @@ public class WhatsAppClientImpl implements WhatsAppClient {
      */
     @Override
     public CompletableFuture<WhatsAppResponse> sendInteractiveAsync(String to, Interactive interactive) {
-        validateInteractiveInput(to, interactive);
+
+        final IllegalArgumentException exception = validateInteractiveInput(to, interactive);
+        if (exception != null) {
+            return CompletableFuture.failedFuture(exception);
+        }
 
         Map<String, Object> data = Map.of(
                 "messaging_product", "whatsapp",

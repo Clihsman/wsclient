@@ -61,7 +61,8 @@ public class WhatsAppClientTest {
                 // Verifica que la excepción tenga el mensaje esperado
                 Throwable cause = exception.getCause();
                 assertNotNull(cause, "Exception cause should not be null");
-                assertTrue(cause instanceof WhatsAppException, "Cause should be of type WhatsAppException");
+                assertTrue(cause instanceof IllegalArgumentException,
+                                "Cause should be of type IllegalArgumentException");
                 assertEquals("Invalid recipient number. The 'to' field must contain only digits.", cause.getMessage());
         }
 
@@ -82,7 +83,9 @@ public class WhatsAppClientTest {
 
                 // Verifica que la excepción sea del tipo correcto
                 Throwable cause = exception.getCause();
-                assertTrue(cause instanceof WhatsAppException, "Cause should be of type WhatsAppException");
+   
+                assertInstanceOf(IllegalArgumentException.class, cause,
+                                "Cause should be of type IllegalArgumentException");
 
                 // Verifica que el mensaje de error sea el esperado
                 assertEquals(
@@ -109,7 +112,8 @@ public class WhatsAppClientTest {
                 assertNotNull(cause, "Exception cause should not be null");
 
                 // Verifica que la excepción sea del tipo correcto
-                assertInstanceOf(WhatsAppException.class, cause, "Cause should be of type WhatsAppException");
+                assertInstanceOf(IllegalArgumentException.class, cause,
+                                "Cause should be of type IllegalArgumentException");
 
                 // Verifica que el mensaje de error sea el esperado
                 final String expectedMessage = String.format(

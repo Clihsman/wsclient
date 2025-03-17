@@ -59,38 +59,40 @@ public final class WhatsAppInputValidator {
      *         otherwise,
      *         returns {@code null}.
      */
-    public static void validateMessageInput(String to, Text text) {
+    public static IllegalArgumentException validateMessageInput(String to, Text text) {
 
         if (Objects.isNull(to)) {
-            throw new IllegalArgumentException("Recipient number cannot be null.");
+            return new IllegalArgumentException("Recipient number cannot be null.");
         }
 
         if (Objects.isNull(text)) {
-            throw new IllegalArgumentException("Text object cannot be null.");
+            return new IllegalArgumentException("Text object cannot be null.");
         }
 
         if (Objects.isNull(text.body())) {
-            throw new IllegalArgumentException("Message body cannot be null.");
+            return new IllegalArgumentException("Message body cannot be null.");
         }
 
         final String message = text.body().trim();
 
         if (!to.matches("\\d+")) {
-            throw new IllegalArgumentException(
+            return new IllegalArgumentException(
                     "Invalid recipient number. The 'to' field must contain only digits.");
         }
 
         if (message.length() < MESSAGE_MIN_TEXT) {
-            throw new IllegalArgumentException(
+            return new IllegalArgumentException(
                     String.format("Message is too short. Minimum length allowed is %d characters.",
                             MESSAGE_MIN_TEXT));
         }
 
         if (message.length() > MESSAGE_MAX_TEXT) {
-            throw new IllegalArgumentException(
+            return new IllegalArgumentException(
                     String.format("Message exceeds max length of %d characters.",
                             MESSAGE_MAX_TEXT));
         }
+
+        return null;
     }
 
     /**
@@ -104,27 +106,27 @@ public final class WhatsAppInputValidator {
      *         otherwise,
      *         returns {@code null}.
      */
-    public static void validateInteractiveInput(String to, Interactive interactive) {
+    public static IllegalArgumentException validateInteractiveInput(String to, Interactive interactive) {
         if (Objects.isNull(to)) {
-            throw new IllegalArgumentException("Recipient number cannot be null.");
+            return new IllegalArgumentException("Recipient number cannot be null.");
         }
 
         if (!to.matches("\\d+")) {
-            throw new IllegalArgumentException(
+            return new IllegalArgumentException(
                     "Invalid recipient number. The 'to' field must contain only digits.");
         }
 
         if (Objects.isNull(interactive)) {
-            throw new IllegalArgumentException("Interactive message cannot be null.");
+            return new IllegalArgumentException("Interactive message cannot be null.");
         }
 
         if (Objects.isNull(interactive.type())) {
-            throw new IllegalArgumentException("Message type cannot be null.");
+            return new IllegalArgumentException("Message type cannot be null.");
         }
 
         if (interactive.type().equals(InteractiveType.BUTTON)) {
             if (Objects.isNull(interactive.action())) {
-                throw new IllegalArgumentException("Action cannot be null for button interactive messages.");
+                return new IllegalArgumentException("Action cannot be null for button interactive messages.");
             }
 
             validateButtonList(interactive.action().buttons());
@@ -139,12 +141,21 @@ public final class WhatsAppInputValidator {
                 throw new IllegalArgumentException("Action cannot be null for button interactive messages.");
             }
 
-            validateButtonList(interactive.action().buttons());
+            final IllegalArgumentException exceptionValidateButtonList = validateButtonList(
+                    interactive.action().buttons());
+            if (exceptionValidateButtonList != null) {
+                return exceptionValidateButtonList;
+            }
 
             for (var button : interactive.action().buttons()) {
-                validateButton(button);
+                final IllegalArgumentException exceptionValidateButton = validateButton(button);
+                if (exceptionValidateButton != null) {
+                    return exceptionValidateButton;
+                }
             }
         }
+        
+        return null;
     }
 
     /**
@@ -155,7 +166,7 @@ public final class WhatsAppInputValidator {
      *         returns
      *         {@code null}.
      */
-    private static void validateButtonList(List<InteractiveButton> buttons) {
+    private static IllegalArgumentException validateButtonList(List<InteractiveButton> buttons) {
         if (buttons == null || buttons.isEmpty()) {
             throw new IllegalArgumentException("Buttons list cannot be null or empty.");
         }
@@ -163,14 +174,16 @@ public final class WhatsAppInputValidator {
         int buttonCount = buttons.size();
 
         if (buttonCount < INTERACTIVE_MIN_BUTTONS) {
-            throw new IllegalArgumentException(
+            return new IllegalArgumentException(
                     String.format("At least %d button(s) are required.", INTERACTIVE_MIN_BUTTONS));
         }
 
         if (buttonCount > INTERACTIVE_MAX_BUTTONS) {
-            throw new IllegalArgumentException(
+            return new IllegalArgumentException(
                     String.format("A maximum of %d buttons are allowed.", INTERACTIVE_MAX_BUTTONS));
         }
+
+        return null;
     }
 
     /**
