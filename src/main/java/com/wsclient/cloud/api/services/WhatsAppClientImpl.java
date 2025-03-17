@@ -1,4 +1,4 @@
-package com.wsclient.cloud.api.messages.service;
+package com.wsclient.cloud.api.services;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;

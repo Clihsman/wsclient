@@ -3,6 +3,26 @@
 ## Overview
 WhatsApp Client is a Java-based library designed to facilitate communication with the WhatsApp API. It provides validation mechanisms and message-sending functionalities, ensuring that all interactions comply with WhatsApp's standards.
 
+## 📂 Project Structure
+````bash
+├── src/  
+│   ├── main/  
+│   │   ├── java/com/wsclient/  
+│   │   │   ├── cloud/api/  
+│   │   │   │   ├── constants/        # Constant definitions
+│   │   │   │   ├── messages/         # Message models
+│   │   │   │   │   ├── request/      # Request structures
+│   │   │   │   │   ├── response/     # WhatsApp responses
+│   │   │   │   ├── services/         # Business logic and API calls
+│   │   │   │   ├── validators/       # Data validation
+│   │   │   │   ├── webhook/          # Handling incoming WhatsApp events
+│   │   │   ├── common/utils/         # Utility functions
+│   │   │   ├── core/exceptions/      # Exception handling
+│   ├── test/                         # Unit tests
+├── pom.xml                           # Maven project configuration
+└── README.md                         # Project documentation
+````
+
 ## Features
 - Input validation for WhatsApp messages
 - Interactive message validation

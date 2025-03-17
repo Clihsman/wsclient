@@ -1,4 +1,4 @@
-package com.wsclient.cloud.api.exceptions;
+package com.wsclient.core.exceptions;
 
 /**
  * Custom exception for handling WhatsApp API errors.

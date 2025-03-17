@@ -1,10 +1,10 @@
-package com.wsclient.cloud.api.messages.service;
+package com.wsclient.cloud.api.services;
 
 import java.io.IOException;
 import java.util.Map;
 
-import com.wsclient.cloud.api.exceptions.WhatsAppException;
 import com.wsclient.cloud.api.messages.response.WhatsAppResponse;
+import com.wsclient.core.exceptions.WhatsAppException;
 
 /**
  * Service interface for handling WhatsApp-related operations.

@@ -1,4 +1,4 @@
-package com.wsclient.core.utils;
+package com.wsclient.common.utils;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
