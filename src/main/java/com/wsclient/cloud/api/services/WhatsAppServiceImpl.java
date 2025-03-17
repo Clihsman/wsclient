@@ -17,31 +17,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Implementation of the {@link WhatsAppService} interface.
- * <p>
- * This class provides the concrete implementation for interacting with the
- * WhatsApp API,
- * handling operations such as sending messages, retrieving conversations, and
- * processing received messages.
- * </p>
- *
- * <p>
- * <b>Responsibilities:</b>
- * </p>
- * <ul>
- * <li>Integrate with the WhatsApp API.</li>
- * <li>Process incoming and outgoing messages.</li>
- * <li>Handle API responses and potential errors.</li>
- * </ul>
- *
- * <p>
- * <b>Usage:</b> This class should be used as a service component in the
- * application,
- * implementing the necessary business logic for WhatsApp communication.
- * </p>
- */
-/**
- * Implementation of the {@link WhatsAppService} interface.
- * <p>
+ * 
  * This class provides functionality for interacting with the WhatsApp API,
  * including:
  * <ul>
@@ -49,7 +25,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * <li>Sending HTTP requests to the API.</li>
  * <li>Processing API responses.</li>
  * </ul>
- * </p>
+ * 
  *
  * <p>
  * <b>Usage:</b> This class should be instantiated and configured before making

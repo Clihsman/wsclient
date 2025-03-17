@@ -6,7 +6,7 @@ package com.wsclient.cloud.api.messages.response;
  * This record holds the unique identifier of a sent message.
  * </p>
  *
- * @param id The unique identifier of the message.
+ * @param waId The unique identifier of the message.
  */
 public record MessageData(String waId) {
 }

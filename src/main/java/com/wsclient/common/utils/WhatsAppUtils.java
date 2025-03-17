@@ -16,6 +16,12 @@ import java.util.Base64;
 public final class WhatsAppUtils {
 
     /**
+     * WhatsAppUtils
+     */
+    private WhatsAppUtils() {
+    }
+
+    /**
      * Extracts and decodes the message ID from a given WhatsApp message identifier.
      *
      * @param messageId The full message identifier in the format

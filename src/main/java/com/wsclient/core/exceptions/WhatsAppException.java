@@ -1,5 +1,7 @@
 package com.wsclient.core.exceptions;
 
+import lombok.Getter;
+
 /**
  * Custom exception for handling WhatsApp API errors.
  * <p>
@@ -9,7 +11,7 @@ package com.wsclient.core.exceptions;
  * for debugging.
  * </p>
  *
- * <h3>Example JSON Error Response:</h3>
+ * <b>Example JSON Error Response:</b>
  * 
  * <pre>
  * {
@@ -27,12 +29,28 @@ package com.wsclient.core.exceptions;
  * }
  * </pre>
  */
+@Getter
 public class WhatsAppException extends Exception {
 
-    private String type;
-    private Integer code;
-    private Integer errorSubcode;
-    private String fbtraceId;
+    /**
+     * The type of error.
+     */
+    private final String type;
+
+    /**
+     * The error code.
+     */
+    private final Integer code;
+
+    /**
+     * The specific subcode for the error.
+     */
+    private final Integer errorSubcode;
+
+    /**
+     * The Facebook trace ID for debugging.
+     */
+    private final String fbtraceId;
 
     /**
      * Constructs a new WhatsAppException with the specified error details.
@@ -68,38 +86,6 @@ public class WhatsAppException extends Exception {
         this.type = type;
         this.code = code;
         this.errorSubcode = errorSubcode;
-        this.fbtraceId = fbtraceId;
-    }
-
-    public String getType() {
-        return type;
-    }
-
-    public void setType(String type) {
-        this.type = type;
-    }
-
-    public Integer getCode() {
-        return code;
-    }
-
-    public void setCode(Integer code) {
-        this.code = code;
-    }
-
-    public Integer getErrorSubcode() {
-        return errorSubcode;
-    }
-
-    public void setErrorSubcode(Integer errorSubcode) {
-        this.errorSubcode = errorSubcode;
-    }
-
-    public String getFbtraceId() {
-        return fbtraceId;
-    }
-
-    public void setFbtraceId(String fbtraceId) {
         this.fbtraceId = fbtraceId;
     }
 }
