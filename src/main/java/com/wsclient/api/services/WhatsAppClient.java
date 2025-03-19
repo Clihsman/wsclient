@@ -1,11 +1,11 @@
-package com.wsclient.cloud.api.services;
+package com.wsclient.api.services;
 
 import java.util.concurrent.CompletableFuture;
 
-import com.wsclient.cloud.api.messages.request.Template;
-import com.wsclient.cloud.api.messages.request.Text;
-import com.wsclient.cloud.api.messages.request.interactive.Interactive;
-import com.wsclient.cloud.api.messages.response.WhatsAppResponse;
+import com.wsclient.api.messages.request.Template;
+import com.wsclient.api.messages.request.Text;
+import com.wsclient.api.messages.request.interactive.Interactive;
+import com.wsclient.api.messages.response.WhatsAppResponse;
 
 /**
  * A client for sending messages via WhatsApp's API.

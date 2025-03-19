@@ -1,4 +1,4 @@
-package com.wsclient.cloud.api.messages.request.interactive;
+package com.wsclient.api.messages.request.interactive;
 
 /**
  * InteractiveSectionRow

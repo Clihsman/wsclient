@@ -1,4 +1,4 @@
-package com.wsclient.cloud.api.constants;
+package com.wsclient.api.constants;
 
 /**
  * WhatsAppConstants

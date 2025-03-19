@@ -1,4 +1,5 @@
-package com.wsclient.cloud.api.messages.request;
+package com.wsclient.api.messages.request;
+
 
 import com.fasterxml.jackson.annotation.JsonValue;
 

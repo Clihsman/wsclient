@@ -1,15 +1,15 @@
-package com.wsclient.cloud.api.services;
+package com.wsclient.api.services;
+
+import static com.wsclient.api.validators.WhatsAppInputValidator.*;
 
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
-import com.wsclient.cloud.api.messages.request.Template;
-import com.wsclient.cloud.api.messages.request.Text;
-import com.wsclient.cloud.api.messages.request.interactive.Interactive;
-import com.wsclient.cloud.api.messages.response.WhatsAppResponse;
-
-import static com.wsclient.cloud.api.validators.WhatsAppInputValidator.*;
+import com.wsclient.api.messages.request.Template;
+import com.wsclient.api.messages.request.Text;
+import com.wsclient.api.messages.request.interactive.Interactive;
+import com.wsclient.api.messages.response.WhatsAppResponse;
 
 /**
  * A client for sending messages via WhatsApp's API.

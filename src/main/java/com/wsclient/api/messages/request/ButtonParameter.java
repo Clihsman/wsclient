@@ -1,4 +1,4 @@
-package com.wsclient.cloud.api.messages.request;
+package com.wsclient.api.messages.request;
 
 /**
  * The Button Parameter Object contains the following fields

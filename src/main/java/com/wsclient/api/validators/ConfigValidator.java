@@ -1,4 +1,4 @@
-package com.wsclient.cloud.api.validators;
+package com.wsclient.api.validators;
 
 /**
  * ConfigValidator

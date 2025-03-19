@@ -5,8 +5,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
 
-import com.wsclient.cloud.api.services.WhatsAppService;
-import com.wsclient.cloud.api.services.WhatsAppServiceImpl;
+import com.wsclient.api.services.WhatsAppService;
+import com.wsclient.api.services.WhatsAppServiceImpl;
 
 public class WhatsAppServiceImpTest {
 

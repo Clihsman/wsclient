@@ -1,4 +1,4 @@
-package com.wsclient.cloud.api.messages.response;
+package com.wsclient.api.messages.response;
 
 import java.util.List;
 

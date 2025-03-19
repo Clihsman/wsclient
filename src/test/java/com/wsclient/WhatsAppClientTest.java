@@ -1,5 +1,6 @@
 package com.wsclient;
 
+import static com.wsclient.api.constants.WhatsAppConstants.*;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
@@ -20,20 +21,18 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import com.wsclient.cloud.api.messages.request.Text;
-import com.wsclient.cloud.api.messages.request.interactive.Interactive;
-import com.wsclient.cloud.api.messages.request.interactive.InteractiveAction;
-import com.wsclient.cloud.api.messages.request.interactive.InteractiveBody;
-import com.wsclient.cloud.api.messages.request.interactive.InteractiveButton;
-import com.wsclient.cloud.api.messages.request.interactive.InteractiveButtonReply;
-import com.wsclient.cloud.api.messages.request.interactive.Interactive.InteractiveType;
-import com.wsclient.cloud.api.messages.response.WhatsAppResponse;
-import com.wsclient.cloud.api.services.WhatsAppClient;
-import com.wsclient.cloud.api.services.WhatsAppClientImpl;
-import com.wsclient.cloud.api.services.WhatsAppService;
+import com.wsclient.api.messages.request.Text;
+import com.wsclient.api.messages.request.interactive.Interactive;
+import com.wsclient.api.messages.request.interactive.InteractiveAction;
+import com.wsclient.api.messages.request.interactive.InteractiveBody;
+import com.wsclient.api.messages.request.interactive.InteractiveButton;
+import com.wsclient.api.messages.request.interactive.InteractiveButtonReply;
+import com.wsclient.api.messages.request.interactive.Interactive.InteractiveType;
+import com.wsclient.api.messages.response.WhatsAppResponse;
+import com.wsclient.api.services.WhatsAppClient;
+import com.wsclient.api.services.WhatsAppClientImpl;
+import com.wsclient.api.services.WhatsAppService;
 import com.wsclient.core.exceptions.WhatsAppException;
-
-import static com.wsclient.cloud.api.constants.WhatsAppConstants.*;
 
 public class WhatsAppClientTest {
 

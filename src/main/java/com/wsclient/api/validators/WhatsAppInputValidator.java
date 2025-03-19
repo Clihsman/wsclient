@@ -1,14 +1,14 @@
-package com.wsclient.cloud.api.validators;
+package com.wsclient.api.validators;
+
+import static com.wsclient.api.constants.WhatsAppConstants.*;
 
 import java.util.List;
 import java.util.Objects;
 
-import com.wsclient.cloud.api.messages.request.Text;
-import com.wsclient.cloud.api.messages.request.interactive.Interactive;
-import com.wsclient.cloud.api.messages.request.interactive.Interactive.InteractiveType;
-import com.wsclient.cloud.api.messages.request.interactive.InteractiveButton;
-
-import static com.wsclient.cloud.api.constants.WhatsAppConstants.*;
+import com.wsclient.api.messages.request.Text;
+import com.wsclient.api.messages.request.interactive.Interactive;
+import com.wsclient.api.messages.request.interactive.InteractiveButton;
+import com.wsclient.api.messages.request.interactive.Interactive.InteractiveType;
 
 /**
  * A utility class for validating input parameters related to WhatsApp

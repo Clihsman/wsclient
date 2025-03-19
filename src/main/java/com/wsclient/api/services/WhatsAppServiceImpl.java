@@ -1,4 +1,5 @@
-package com.wsclient.cloud.api.services;
+package com.wsclient.api.services;
+
 
 import java.io.IOException;
 import java.net.URI;
@@ -7,9 +8,9 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Map;
 
-import com.wsclient.cloud.api.messages.request.Error;
-import com.wsclient.cloud.api.messages.response.WhatsAppResponse;
-import com.wsclient.cloud.api.validators.ConfigValidator;
+import com.wsclient.api.messages.request.Error;
+import com.wsclient.api.messages.response.WhatsAppResponse;
+import com.wsclient.api.validators.ConfigValidator;
 import com.wsclient.core.exceptions.WhatsAppException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;

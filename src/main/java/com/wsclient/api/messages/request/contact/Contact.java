@@ -1,4 +1,4 @@
-package com.wsclient.cloud.api.messages.request.contact;
+package com.wsclient.api.messages.request.contact;
 
 import java.util.List;
 

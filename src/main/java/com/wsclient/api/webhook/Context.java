@@ -1,4 +1,4 @@
-package com.wsclient.cloud.api.webhook;
+package com.wsclient.api.webhook;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

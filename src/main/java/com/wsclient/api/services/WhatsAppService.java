@@ -1,9 +1,9 @@
-package com.wsclient.cloud.api.services;
+package com.wsclient.api.services;
 
 import java.io.IOException;
 import java.util.Map;
 
-import com.wsclient.cloud.api.messages.response.WhatsAppResponse;
+import com.wsclient.api.messages.response.WhatsAppResponse;
 import com.wsclient.core.exceptions.WhatsAppException;
 
 /**
