@@ -8,7 +8,7 @@ WhatsApp Client is a Java-based library designed to facilitate communication wit
 ├── src/  
 │   ├── main/  
 │   │   ├── java/com/wsclient/  
-│   │   │   ├── cloud/api/  
+│   │   │   ├── /api/  
 │   │   │   │   ├── constants/        # Constant definitions
 │   │   │   │   ├── messages/         # Message models
 │   │   │   │   │   ├── request/      # Request structures
