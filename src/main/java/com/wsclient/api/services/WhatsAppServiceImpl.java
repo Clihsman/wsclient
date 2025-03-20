@@ -7,7 +7,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Map;
 
-import com.wsclient.api.messages.request.Error;
+import com.wsclient.api.messages.response.WhatsAppErrorResponse;
 import com.wsclient.api.messages.response.WhatsAppResponse;
 import com.wsclient.api.validators.ConfigValidator;
 import com.wsclient.core.exceptions.WhatsAppException;
@@ -34,7 +34,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class WhatsAppServiceImpl implements WhatsAppService {
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(); 
 
     private String whatsappApiUrl;
     private String phoneNumberId;
@@ -165,13 +165,13 @@ public class WhatsAppServiceImpl implements WhatsAppService {
 
         if (statusCode != 200) {
             try {
-                Error error = OBJECT_MAPPER.readValue(response.body(), Error.class);
+                WhatsAppErrorResponse whatsAppErrorResponse = OBJECT_MAPPER.readValue(response.body(), WhatsAppErrorResponse.class);
                 throw new WhatsAppException(
-                        error.message(),
-                        error.type(),
-                        error.code(),
-                        error.errorSubcode(),
-                        error.fbtraceId());
+                        whatsAppErrorResponse.error().message(),
+                        whatsAppErrorResponse.error().type(),
+                        whatsAppErrorResponse.error().code(),
+                        whatsAppErrorResponse.error().errorSubcode(),
+                        whatsAppErrorResponse.error().fbtraceId());
             } catch (JsonProcessingException e) {
                 throw new WhatsAppException("Failed to parse error response", "ParsingError",
                         statusCode, 0, null, e);
