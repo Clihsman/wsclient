@@ -1,5 +1,7 @@
 package com.wsclient.api.messages.request.interactive;
 
+import lombok.Builder;
+
 /**
  * Represents a row in an interactive section for WhatsApp messages.
  * This record is used to define selectable options within a section.
@@ -10,6 +12,7 @@ package com.wsclient.api.messages.request.interactive;
  * @param description Additional description for the row (Maximum length: 72
  *                    characters).
  */
+@Builder
 public record InteractiveSectionRow(
         String id,
         String title,

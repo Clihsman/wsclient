@@ -4,10 +4,15 @@ import static com.wsclient.api.constants.WhatsAppConstants.*;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.wsclient.api.messages.request.Text;
 import com.wsclient.api.messages.request.interactive.Interactive;
 import com.wsclient.api.messages.request.interactive.InteractiveButton;
+import com.wsclient.api.messages.request.interactive.InteractiveButtonReply;
+import com.wsclient.api.messages.request.interactive.InteractiveSection;
+import com.wsclient.api.messages.request.interactive.InteractiveSectionRow;
 import com.wsclient.api.messages.request.interactive.Interactive.InteractiveType;
 
 /**
@@ -43,10 +48,9 @@ import com.wsclient.api.messages.request.interactive.Interactive.InteractiveType
 public final class WhatsAppInputValidator {
 
     /**
-     * 
+     * WhatsAppInputValidator
      */
     private WhatsAppInputValidator() {
-
     }
 
     /**
@@ -138,23 +142,25 @@ public final class WhatsAppInputValidator {
 
         if (interactive.type().equals(InteractiveType.LIST)) {
             if (Objects.isNull(interactive.action())) {
-                throw new IllegalArgumentException("Action cannot be null for button interactive messages.");
+                throw new IllegalArgumentException("Action cannot be null for list interactive messages.");
             }
 
-            final IllegalArgumentException exceptionValidateButtonList = validateButtonList(
-                    interactive.action().buttons());
+            final IllegalArgumentException exceptionValidateButtonList = validateSectionList(
+                    interactive.action().sections());
             if (exceptionValidateButtonList != null) {
                 return exceptionValidateButtonList;
             }
-
-            for (var button : interactive.action().buttons()) {
-                final IllegalArgumentException exceptionValidateButton = validateButton(button);
-                if (exceptionValidateButton != null) {
-                    return exceptionValidateButton;
-                }
-            }
+            /*
+             * for (var button : interactive.action().buttons()) {
+             * final IllegalArgumentException exceptionValidateButton =
+             * validateButton(button);
+             * if (exceptionValidateButton != null) {
+             * return exceptionValidateButton;
+             * }
+             * }
+             */
         }
-        
+
         return null;
     }
 
@@ -195,11 +201,12 @@ public final class WhatsAppInputValidator {
      *         {@code null}.
      */
     private static IllegalArgumentException validateButton(InteractiveButton button) {
-        if (button.reply() == null || button.reply().title() == null) {
-            throw new IllegalArgumentException("Button title cannot be null.");
-        }
 
-        int titleLength = button.reply().title().length();
+        InteractiveButtonReply buttonReply = Optional.ofNullable(button.reply())
+                .orElseThrow(() -> new IllegalArgumentException("Button reply cannot be null."));
+
+        int titleLength = Optional.ofNullable(buttonReply.title()).map(String::length)
+                .orElseThrow(() -> new IllegalArgumentException("Button title cannot be null."));
 
         if (titleLength < 1) {
             throw new IllegalArgumentException("Button title must contain at least 1 character.");
@@ -212,4 +219,15 @@ public final class WhatsAppInputValidator {
         return null;
     }
 
+    private static IllegalArgumentException validateSectionList(List<InteractiveSection> interactiveSections) {
+
+        List<InteractiveSectionRow> interactiveSectionRows = interactiveSections.stream()
+                .map(InteractiveSection::rows).flatMap(List::stream).collect(Collectors.toList());
+
+        if (interactiveSectionRows.size() > 10) {
+            throw new IllegalArgumentException("asdasd");
+        }
+
+        return null;
+    }
 }

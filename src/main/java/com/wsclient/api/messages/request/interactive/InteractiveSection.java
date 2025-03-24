@@ -2,12 +2,15 @@ package com.wsclient.api.messages.request.interactive;
 
 import java.util.List;
 
+import lombok.Builder;
+
 /**
  * InteractiveSection
  * 
  * @param title title
  * @param rows  rows
  */
+@Builder
 public record InteractiveSection(
                 /**
                  * <strong>

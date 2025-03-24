@@ -10,7 +10,7 @@ public record Entry(
                 /**
                  * The ID of Whatsapp Business Accounts this Webhook belongs to.
                  */
-                Integer id,
+                String id,
                 /**
                  * Changes that triggered the Webhooks call. This field contains an array of
                  * change objects.

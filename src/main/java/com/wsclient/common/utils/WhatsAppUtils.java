@@ -38,14 +38,14 @@ public final class WhatsAppUtils {
         String[] parts = messageId.split("\\.");
 
         if (parts.length < 2) {
-            throw new IllegalArgumentException("Invalid message ID format.");
+            throw new IllegalArgumentException("Invalid message ID format. Expected format: wamid.<base64-encoded-id>");
         }
 
         try {
             byte[] decodedBytes = Base64.getDecoder().decode(parts[1]);
             return new String(decodedBytes, StandardCharsets.UTF_8);
         } catch (IllegalArgumentException e) {
-            throw new IllegalStateException("Failed to decode message ID.", e);
+            throw new IllegalArgumentException("Failed to decode base64 message ID.", e);
         }
     }
 
