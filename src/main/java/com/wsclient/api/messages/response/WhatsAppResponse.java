@@ -17,7 +17,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @param messages         A list of messages sent or received.
  */
 public record WhatsAppResponse(
-        @JsonProperty("messaging_product") String messagingProduct,
-        List<ContactData> contacts,
-        List<MessageData> messages) {
+                @JsonProperty("messaging_product") String messagingProduct,
+                List<ContactData> contacts,
+                List<MessageData> messages) {
 }

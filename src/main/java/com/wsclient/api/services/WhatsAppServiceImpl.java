@@ -7,7 +7,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Map;
 
-import com.wsclient.api.messages.request.Error;
+import com.wsclient.api.messages.response.WhatsAppErrorResponse;
 import com.wsclient.api.messages.response.WhatsAppResponse;
 import com.wsclient.api.validators.ConfigValidator;
 import com.wsclient.core.exceptions.WhatsAppException;
@@ -37,6 +37,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * @since 2025-03-10
  */
 public class WhatsAppServiceImpl implements WhatsAppService {
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(); 
+
     private String whatsappApiUrl;
     private String phoneNumberId;
     private String token;
@@ -113,7 +116,7 @@ public class WhatsAppServiceImpl implements WhatsAppService {
         return HttpRequest.newBuilder()
                 .uri(URI.create(String.format("%s/%s/messages", whatsappApiUrl, phoneNumberId)))
                 .header("Content-Type", "application/json")
-                .header("Authorization", "Bearer " + token)
+                .header("Authorization", String.format("Bearer %s", token))
                 .POST(HttpRequest.BodyPublishers.ofString(bodyString))
                 .build();
     }
@@ -136,13 +139,47 @@ public class WhatsAppServiceImpl implements WhatsAppService {
      */
     private WhatsAppResponse getWhatsAppResponse(HttpResponse<String> response)
             throws WhatsAppException, JsonMappingException, JsonProcessingException {
-        final ObjectMapper objectMapper = new ObjectMapper();
+
+        throwIfErrorResponse(response);
+
         final String body = response.body();
-        if (response.statusCode() != 200) {
-            Error error = objectMapper.readValue(body, Error.class);
-            throw new WhatsAppException(error.message(), error.type(), error.code(), error.errorSubcode(),
-                    error.fbtraceId());
+        return OBJECT_MAPPER.readValue(body, WhatsAppResponse.class);
+    }
+
+    /**
+     * Checks the HTTP response for errors and throws a {@link WhatsAppException} if
+     * an error is detected.
+     *
+     * <p>
+     * This method verifies if the response status code is different from 200. If an
+     * error is present,
+     * it attempts to parse the error details from the response body and throws a
+     * {@link WhatsAppException}
+     * containing relevant error information. If the response body cannot be parsed,
+     * a generic parsing
+     * error exception is thrown.
+     * </p>
+     *
+     * @param response the HTTP response to check.
+     * @throws WhatsAppException if the response contains an error, including
+     *                           parsing failures.
+     */
+    private void throwIfErrorResponse(HttpResponse<String> response) throws WhatsAppException {
+        int statusCode = response.statusCode();
+
+        if (statusCode != 200) {
+            try {
+                WhatsAppErrorResponse whatsAppErrorResponse = OBJECT_MAPPER.readValue(response.body(), WhatsAppErrorResponse.class);
+                throw new WhatsAppException(
+                        whatsAppErrorResponse.error().message(),
+                        whatsAppErrorResponse.error().type(),
+                        whatsAppErrorResponse.error().code(),
+                        whatsAppErrorResponse.error().errorSubcode(),
+                        whatsAppErrorResponse.error().fbtraceId());
+            } catch (JsonProcessingException e) {
+                throw new WhatsAppException("Failed to parse error response", "ParsingError",
+                        statusCode, 0, null, e);
+            }
         }
-        return objectMapper.readValue(response.body(), WhatsAppResponse.class);
     }
 }

@@ -27,6 +27,8 @@ import com.wsclient.api.messages.request.interactive.InteractiveAction;
 import com.wsclient.api.messages.request.interactive.InteractiveBody;
 import com.wsclient.api.messages.request.interactive.InteractiveButton;
 import com.wsclient.api.messages.request.interactive.InteractiveButtonReply;
+import com.wsclient.api.messages.request.interactive.InteractiveSection;
+import com.wsclient.api.messages.request.interactive.InteractiveSectionRow;
 import com.wsclient.api.messages.request.interactive.Interactive.InteractiveType;
 import com.wsclient.api.messages.response.WhatsAppResponse;
 import com.wsclient.api.services.WhatsAppClient;
@@ -82,7 +84,7 @@ public class WhatsAppClientTest {
 
                 // Verifica que la excepción sea del tipo correcto
                 Throwable cause = exception.getCause();
-   
+
                 assertInstanceOf(IllegalArgumentException.class, cause,
                                 "Cause should be of type IllegalArgumentException");
 
@@ -148,6 +150,57 @@ public class WhatsAppClientTest {
         }
 
         @Test
+        void sendMessageAsync_ShouldReturnResponse_WhenRequestIsSuccessful3()
+                        throws IOException, InterruptedException, WhatsAppException {
+                // Arrange: Datos válidos
+                final String validPhoneNumber = "3001111222";
+
+                final InteractiveButtonReply buttonReply = InteractiveButtonReply
+                                .builder()
+                                .id("1")
+                                .title("item1")
+                                .build();
+
+                final InteractiveButton interactiveButton = InteractiveButton.builder()
+                                .reply(buttonReply)
+                                .build();
+                final List<InteractiveButton> buttons = List.of(interactiveButton);
+
+                final InteractiveAction interactiveAction = InteractiveAction.builder().buttons(buttons).build();
+
+                final InteractiveBody interactiveBody = InteractiveBody
+                                .builder()
+                                .text("Example Text")
+                                .build();
+
+                final Interactive exampleInteractive = Interactive
+                                .builder()
+                                .type(InteractiveType.BUTTON)
+                                .action(interactiveAction)
+                                .body(interactiveBody)
+                                .build();
+
+                final WhatsAppResponse expectedResponse = new WhatsAppResponse(validPhoneNumber, null, null);
+
+                Map<String, Object> requestData = Map.of(
+                                "messaging_product", "whatsapp",
+                                "to", validPhoneNumber,
+                                "type", "interactive",
+                                "interactive", exampleInteractive);
+
+                when(whatsAppService.sendRequest(requestData)).thenReturn(expectedResponse);
+
+                // Act: Llamar al método bajo prueba
+                final WhatsAppResponse actualResponse = whatsAppClient
+                                .sendInteractiveAsync(validPhoneNumber, exampleInteractive)
+                                .join();
+
+                // Assert: Validar que la respuesta es correcta
+                assertEquals(expectedResponse, actualResponse);
+                verify(whatsAppService, times(1)).sendRequest(requestData); // Se llamó una vez
+        }
+
+        @Test
         void sendMessageAsync_ShouldReturnResponse_WhenRequestIsSuccessful2()
                         throws IOException, InterruptedException, WhatsAppException {
                 // Arrange: Datos válidos
@@ -155,17 +208,44 @@ public class WhatsAppClientTest {
 
                 final Interactive exampleInteractive = Interactive
                                 .builder()
-                                .type(InteractiveType.BUTTON)
+                                .type(InteractiveType.LIST)
                                 .action(
                                                 InteractiveAction
                                                                 .builder()
-                                                                .buttons(List.of(
-                                                                                InteractiveButton.builder()
-                                                                                                .reply(InteractiveButtonReply
-                                                                                                                .builder()
-                                                                                                                .id("1")
-                                                                                                                .title("bt1")
-                                                                                                                .build())
+                                                                .sections(List.of(
+                                                                                InteractiveSection.builder()
+                                                                                                .rows(
+                                                                                                                List.of(
+                                                                                                                                InteractiveSectionRow
+                                                                                                                                                .builder()
+                                                                                                                                                .build(),
+                                                                                                                                InteractiveSectionRow
+                                                                                                                                                .builder()
+                                                                                                                                                .build(),
+                                                                                                                                InteractiveSectionRow
+                                                                                                                                                .builder()
+                                                                                                                                                .build(),
+                                                                                                                                InteractiveSectionRow
+                                                                                                                                                .builder()
+                                                                                                                                                .build(),
+                                                                                                                                InteractiveSectionRow
+                                                                                                                                                .builder()
+                                                                                                                                                .build(),
+                                                                                                                                InteractiveSectionRow
+                                                                                                                                                .builder()
+                                                                                                                                                .build(),
+                                                                                                                                InteractiveSectionRow
+                                                                                                                                                .builder()
+                                                                                                                                                .build(),
+                                                                                                                                InteractiveSectionRow
+                                                                                                                                                .builder()
+                                                                                                                                                .build(),
+                                                                                                                                InteractiveSectionRow
+                                                                                                                                                .builder()
+                                                                                                                                                .build(),
+                                                                                                                                InteractiveSectionRow
+                                                                                                                                                .builder()
+                                                                                                                                                .build()))
                                                                                                 .build()))
                                                                 .build())
                                 .body(
