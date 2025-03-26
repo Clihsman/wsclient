@@ -38,11 +38,24 @@
       <version>5.11.3</version>
       <scope>test</scope>
     </dependency>
+
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
       <version>5.11.3</version>
       <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpclient</artifactId>
+      <version>4.5.14</version>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.httpcomponents</groupId>
+      <artifactId>httpmime</artifactId>
+      <version>4.3.1</version>
     </dependency>
 
     <!-- Mockito -->
@@ -52,6 +65,7 @@
       <version>5.15.2</version>
       <scope>test</scope>
     </dependency>
+
   </dependencies>
 
   <build>

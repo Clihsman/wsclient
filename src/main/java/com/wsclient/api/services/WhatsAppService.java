@@ -25,6 +25,10 @@ import com.wsclient.core.exceptions.WhatsAppException;
  * implementations
  * for WhatsApp messaging functionalities.
  * </p>
+ *
+ * @author Clisman Isaac Iscala
+ * @version 1.0
+ * @since 2025-03-10
  */
 public interface WhatsAppService {
 

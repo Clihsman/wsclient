@@ -1,6 +1,5 @@
 package com.wsclient.api.services;
 
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -32,6 +31,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  * <b>Usage:</b> This class should be instantiated and configured before making
  * API requests.
  * </p>
+ *
+ * @author Clisman Isaac Iscala
+ * @version 1.0
+ * @since 2025-03-10
  */
 public class WhatsAppServiceImpl implements WhatsAppService {
     private String whatsappApiUrl;
