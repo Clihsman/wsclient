@@ -5,7 +5,8 @@ import java.io.InputStream;
 import java.util.concurrent.CompletableFuture;
 
 /**
- * WhatsAppMediaService
+ * Defines the contract for handling media-related operations
+ * for WhatsApp, such as uploading media files.
  */
 public interface WhatsAppMediaService {
 

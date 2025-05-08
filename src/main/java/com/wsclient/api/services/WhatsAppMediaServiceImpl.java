@@ -21,7 +21,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.wsclient.api.validators.ConfigValidator;
 
 /**
- * WhatsAppMediaServiceImpl
+ * Implementation of the {@link WhatsAppMediaService} interface that handles
+ * media upload operations to the WhatsApp server.
  */
 public class WhatsAppMediaServiceImpl implements WhatsAppMediaService {
 
