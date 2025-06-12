@@ -1,12 +1,18 @@
 package com.wsclient.api.messages.request;
 
+import lombok.Builder;
+import lombok.Data;
+
 /**
  * The Button Parameter Object contains the following fields
- * @param type type
+ * 
+ * @param type    type
  * @param payload payload
- * @param text text
+ * @param text    text
  */
-public record ButtonParameter(
+@Builder
+@Data
+public class ButtonParameter {
         /**
          * <strong>
          * Required.
@@ -20,7 +26,7 @@ public record ButtonParameter(
          * Values: <code>payload</code>,<code>text</code>
          * </p>
          */
-        String type,
+        private String type;
         /**
          * <strong>
          * Required for quick_reply buttons.
@@ -35,7 +41,7 @@ public record ButtonParameter(
          * For more information on usage, see Callback from a Quick Reply Button Click.
          * </p>
          */
-        String payload,
+        private String payload;
         /**
          * <strong>
          * Required for url buttons.
@@ -46,5 +52,5 @@ public record ButtonParameter(
          * the template.
          * </p>
          */
-        String text) {
+        private String text;
 }

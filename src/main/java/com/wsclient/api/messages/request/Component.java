@@ -1,9 +1,9 @@
 package com.wsclient.api.messages.request;
 
-
 import com.fasterxml.jackson.annotation.JsonValue;
 
 import lombok.Builder;
+import lombok.Data;
 
 /**
  * The Components Object contains the following fields
@@ -12,28 +12,31 @@ import lombok.Builder;
  * @param parameters parameters
  */
 @Builder
-public record Component(
-        /**
-         * <strong>
-         * Required.
-         * </strong>
-         * <p>
-         * Describes the component type.
-         * </p>
-         * </p>
-         * <strong>Values</strong>: <code>header</code>, <code>body</code>,
-         * <code>button</code>
-         * For text-based templates, only <code>body</code> is supported.
-         * </p>
-         */
-        ComponentType type,
-        /**
-         * <strong>Required when type is</strong> <code>button</code>.
-         * <p>
-         * The namespace of the template.
-         * </p>
-         */
-        Parameter parameters) {
+@Data
+public class Component {
+
+    /**
+     * <strong>
+     * Required.
+     * </strong>
+     * <p>
+     * Describes the component type.
+     * </p>
+     * </p>
+     * <strong>Values</strong>: <code>header</code>, <code>body</code>,
+     * <code>button</code>
+     * For text-based templates, only <code>body</code> is supported.
+     * </p>
+     */
+    private ComponentType type;
+    /**
+     * <strong>Required when type is</strong> <code>button</code>.
+     * <p>
+     * The namespace of the template.
+     * </p>
+     */
+    private Parameter parameters;
+
     /**
      * ComponentType
      */

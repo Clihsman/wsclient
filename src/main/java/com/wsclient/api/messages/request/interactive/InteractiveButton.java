@@ -1,6 +1,7 @@
 package com.wsclient.api.messages.request.interactive;
 
 import lombok.Builder;
+import lombok.Data;
 
 /**
  * InteractiveButton
@@ -9,20 +10,12 @@ import lombok.Builder;
  * @param reply reply
  */
 @Builder
-public record InteractiveButton(
-        /**
-         * only supported if type=reply(for Reply Button)
-         */
-        String type,
-        InteractiveButtonReply reply) {
-
+@Data
+public class InteractiveButton {
     /**
-     * InteractiveButton
-     * 
-     * @param type  type
-     * @param reply reply
+     * only supported if type=reply(for Reply Button)
      */
-    public InteractiveButton {
-        type = "reply";
-    }
+    @Builder.Default
+    private String type = "reply";
+    private InteractiveButtonReply reply;
 }

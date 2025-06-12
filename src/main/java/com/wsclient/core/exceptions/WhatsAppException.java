@@ -1,7 +1,5 @@
 package com.wsclient.core.exceptions;
 
-import lombok.Getter;
-
 /**
  * Custom exception for handling WhatsApp API errors.
  * <p>
@@ -29,7 +27,6 @@ import lombok.Getter;
  * }
  * </pre>
  */
-@Getter
 public class WhatsAppException extends Exception {
 
     /**
@@ -87,5 +84,33 @@ public class WhatsAppException extends Exception {
         this.code = code;
         this.errorSubcode = errorSubcode;
         this.fbtraceId = fbtraceId;
+    }
+
+    /**
+     * The type of error.
+     */
+    public String getType() {
+        return type;
+    }
+
+    /**
+     * The error code.
+     */
+    public Integer getCode() {
+        return code;
+    }
+
+    /**
+     * The specific subcode for the error.
+     */
+    public Integer getErrorSubcode() {
+        return errorSubcode;
+    }
+
+    /**
+     * The Facebook trace ID for debugging.
+     */
+    public String getFbtraceId() {
+        return fbtraceId;
     }
 }

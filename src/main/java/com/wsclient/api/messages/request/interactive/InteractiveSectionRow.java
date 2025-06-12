@@ -1,6 +1,7 @@
 package com.wsclient.api.messages.request.interactive;
 
 import lombok.Builder;
+import lombok.Data;
 
 /**
  * Represents a row in an interactive section for WhatsApp messages.
@@ -13,8 +14,9 @@ import lombok.Builder;
  *                    characters).
  */
 @Builder
-public record InteractiveSectionRow(
-        String id,
-        String title,
-        String description) {
+@Data
+public class InteractiveSectionRow {
+        private String id;
+        private String title;
+        private String description;
 }

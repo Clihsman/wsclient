@@ -1,4 +1,4 @@
-package com.wsclient.api.messages.request;
+package com.wsclient.api.messages.response;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

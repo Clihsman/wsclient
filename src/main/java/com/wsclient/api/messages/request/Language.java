@@ -1,15 +1,18 @@
 package com.wsclient.api.messages.request;
 
 import lombok.Builder;
+import lombok.Data;
 
 /**
  * The Language Object contains the following fields
  * 
  * @param policy policy
- * @param code code
+ * @param code   code
  */
 @Builder
-public record Language(
+@Data
+public class Language {
+
         /**
          * <strong>
          * Optional.
@@ -19,7 +22,7 @@ public record Language(
          * </p>
          * Default (and only supported value): deterministic
          */
-        String policy,
+        private String policy;
         /**
          * <strong>
          * Required.
@@ -34,6 +37,6 @@ public record Language(
          *      Languages.</a>
          *      </p>
          */
-        String code) {
+        private String code;
 
 }

@@ -1,6 +1,7 @@
 package com.wsclient.api.messages.request.interactive;
 
 import lombok.Builder;
+import lombok.Data;
 
 /**
  * InteractiveBody
@@ -8,7 +9,8 @@ import lombok.Builder;
  * @param text text
  */
 @Builder
-public record InteractiveBody(
+@Data
+public class InteractiveBody {
         /**
          * <strong>
          * Required.
@@ -21,6 +23,5 @@ public record InteractiveBody(
          * 
          * Maximum length: 1024 characters
          */
-        String text) {
-
+        private String text;
 }

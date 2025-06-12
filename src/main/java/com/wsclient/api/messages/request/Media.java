@@ -1,6 +1,7 @@
 package com.wsclient.api.messages.request;
 
 import lombok.Builder;
+import lombok.Data;
 
 /**
  * The Media Object consists of audio, document, image, sticker, and video
@@ -12,7 +13,8 @@ import lombok.Builder;
  * @param filename filename
  */
 @Builder
-public record Media(
+@Data
+public class Media {
         /**
          * <p>
          * Required when type is an image, audio, document, sticker, or video and you
@@ -21,7 +23,7 @@ public record Media(
          * 
          * The media object ID. For more information, see Get Media ID.
          */
-        Long id,
+        private String id;
         /**
          * <p>
          * Required when type is audio, document, image, sticker, or video and you are
@@ -29,7 +31,7 @@ public record Media(
          * </p>
          * The protocol and URL of the media to be sent. Use only with HTTP/HTTPS URLs.
          */
-        String link,
+        private String link;
         /**
          * <strong>
          * Optional.
@@ -39,7 +41,7 @@ public record Media(
          * or sticker media.
          * </p>
          */
-        String caption,
+        private String caption;
         /**
          * <strong>
          * Optional.
@@ -49,5 +51,5 @@ public record Media(
          * media.
          * </p>
          */
-        String filename) {
+        private String filename;
 }

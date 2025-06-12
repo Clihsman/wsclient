@@ -1,5 +1,8 @@
 package com.wsclient.api.messages.request;
 
+import lombok.Builder;
+import lombok.Data;
+
 /**
  * Location
  * 
@@ -8,7 +11,9 @@ package com.wsclient.api.messages.request;
  * @param name      name
  * @param address   address
  */
-public record Location(
+@Builder
+@Data
+public class Location {
         /**
          * <strong>
          * Required.
@@ -18,7 +23,7 @@ public record Location(
          * The longitude of the location.
          * </p>
          */
-        String longitude,
+        private String longitude;
         /**
          * <strong>
          * Required.
@@ -28,7 +33,7 @@ public record Location(
          * The latitude of the location.
          * </p>
          */
-        String latitude,
+        private String latitude;
         /**
          * <strong>
          * Optional.
@@ -38,7 +43,7 @@ public record Location(
          * The name of the location.
          * </p>
          */
-        String name,
+        private String name;
         /**
          * <strong>
          * Optional.
@@ -48,5 +53,5 @@ public record Location(
          * The address of the location. This field is only displayed if name is present.
          * </p>
          */
-        String address) {
+        private String address;
 }
