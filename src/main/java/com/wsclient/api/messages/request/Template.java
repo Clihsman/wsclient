@@ -2,8 +2,10 @@ package com.wsclient.api.messages.request;
 
 import java.util.List;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * The Template Object contains the following fields
@@ -14,6 +16,8 @@ import lombok.Data;
  */
 @Builder
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Template {
         /**
          * <strong>

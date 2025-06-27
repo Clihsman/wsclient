@@ -2,8 +2,10 @@ package com.wsclient.api.messages.request;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * A Text Object consists of the following fields and formatting options
@@ -13,6 +15,8 @@ import lombok.Data;
  */
 @Builder
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Text {
 
     /**

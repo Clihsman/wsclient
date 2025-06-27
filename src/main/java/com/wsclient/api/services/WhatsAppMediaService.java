@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.CompletableFuture;
 
+import com.wsclient.api.messages.response.MediaResponse;
+
 /**
  * Defines the contract for handling media-related operations
  * for WhatsApp, such as uploading media files.
@@ -46,5 +48,5 @@ public interface WhatsAppMediaService {
      * @throws IOException if an I/O error occurs while reading the file or during
      *                     the upload process.
      */
-    CompletableFuture<String> uploadMedia(String filePath, String fileName, String type) throws IOException;
+    CompletableFuture<MediaResponse> uploadMedia(String filePath, String fileName, String type) throws IOException;
 }

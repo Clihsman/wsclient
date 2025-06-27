@@ -88,6 +88,7 @@ public class WhatsAppException extends Exception {
 
     /**
      * The type of error.
+     * @return type
      */
     public String getType() {
         return type;
@@ -95,6 +96,7 @@ public class WhatsAppException extends Exception {
 
     /**
      * The error code.
+     * @return code
      */
     public Integer getCode() {
         return code;
@@ -102,6 +104,7 @@ public class WhatsAppException extends Exception {
 
     /**
      * The specific subcode for the error.
+     * @return subcode
      */
     public Integer getErrorSubcode() {
         return errorSubcode;

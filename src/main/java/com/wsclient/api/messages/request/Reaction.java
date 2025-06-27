@@ -1,7 +1,9 @@
 package com.wsclient.api.messages.request;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * The Reaction Object consists of a message ID and a emoji.
@@ -11,6 +13,8 @@ import lombok.Data;
  */
 @Builder
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Reaction {
     /**
      * <strong>

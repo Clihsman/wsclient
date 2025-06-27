@@ -1,7 +1,9 @@
 package com.wsclient.api.messages.request;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * The Button Parameter Object contains the following fields
@@ -12,6 +14,8 @@ import lombok.Data;
  */
 @Builder
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class ButtonParameter {
         /**
          * <strong>

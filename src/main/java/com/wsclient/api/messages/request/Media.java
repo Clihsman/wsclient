@@ -1,7 +1,9 @@
 package com.wsclient.api.messages.request;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * The Media Object consists of audio, document, image, sticker, and video
@@ -14,6 +16,8 @@ import lombok.Data;
  */
 @Builder
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Media {
         /**
          * <p>

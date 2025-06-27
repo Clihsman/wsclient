@@ -1,6 +1,7 @@
 package com.wsclient.api.messages.request.interactive;
 
 import java.util.List;
+import java.util.Map;
 
 import lombok.Builder;
 import lombok.Data;
@@ -15,6 +16,12 @@ import lombok.Data;
 @Builder
 @Data
 public class InteractiveAction {
+
+    /***
+     * Action name
+     */
+    private String name;
+
     /**
      * <strong>
      * Required for all List Messages.
@@ -66,4 +73,8 @@ public class InteractiveAction {
      */
     private List<InteractiveSection> sections;
 
+    /***
+     * parameters
+     */
+    private Map<String, String> parameters;
 }

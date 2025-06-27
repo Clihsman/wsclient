@@ -168,6 +168,10 @@ public class Interactive {
          */
         PRODUCT("product"),
         /**
+         * CTA_URL
+         */
+        CTA_URL("cta_url"),
+        /**
          * PRODUCT_LIST
          */
         PRODUCT_LIST("product");

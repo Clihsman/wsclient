@@ -2,8 +2,10 @@ package com.wsclient.api.messages.request.interactive;
 
 import java.util.List;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 /**
  * InteractiveSection
@@ -13,6 +15,8 @@ import lombok.Data;
  */
 @Builder
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class InteractiveSection {
     /**
      * <strong>
