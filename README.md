@@ -47,7 +47,7 @@ mvn clean install
 
 ```java
  WhatsAppService service = new WhatsAppServiceImpl();
- WhatsAppClient client = new WhatsAppClient(service);
+ WhatsAppClient client = new WhatsAppClientImpl(service);
  Text textMessage = new Text("Hello, this is a test message!");
  client.sendMessage("1234567890", textMessage);
 ```
