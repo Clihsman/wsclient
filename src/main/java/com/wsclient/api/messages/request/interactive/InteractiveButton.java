@@ -6,8 +6,6 @@ import lombok.Data;
 /**
  * InteractiveButton
  * 
- * @param type  type
- * @param reply reply
  */
 @Builder
 @Data

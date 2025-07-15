@@ -9,9 +9,6 @@ import lombok.Data;
 /**
  * InteractiveAction
  * 
- * @param button   button
- * @param buttons  buttons
- * @param sections sections
  */
 @Builder
 @Data

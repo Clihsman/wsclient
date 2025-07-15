@@ -8,8 +8,6 @@ import lombok.NoArgsConstructor;
 /**
  * The Reaction Object consists of a message ID and a emoji.
  * 
- * @param message_id message_id
- * @param emoji      emoji
  */
 @Builder
 @Data

@@ -10,8 +10,6 @@ import lombok.NoArgsConstructor;
 /**
  * InteractiveSection
  * 
- * @param title title
- * @param rows  rows
  */
 @Builder
 @Data

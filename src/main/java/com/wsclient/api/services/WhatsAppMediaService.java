@@ -34,7 +34,7 @@ public interface WhatsAppMediaService {
      *         URL once the upload is successful.
      * @throws IOException if an I/O error occurs during the upload process.
      */
-    CompletableFuture<String> uploadMedia(InputStream media, String fileName, String type) throws IOException;
+    CompletableFuture<MediaResponse> uploadMedia(InputStream media, String fileName, String type) throws IOException;
 
     /**
      * Uploads a media file from the specified file path to the server.

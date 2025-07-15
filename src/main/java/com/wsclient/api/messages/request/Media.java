@@ -9,10 +9,6 @@ import lombok.NoArgsConstructor;
  * The Media Object consists of audio, document, image, sticker, and video
  * objects.
  * 
- * @param id       id
- * @param link     link
- * @param caption  caption
- * @param filename filename
  */
 @Builder
 @Data

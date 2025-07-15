@@ -8,10 +8,6 @@ import lombok.NoArgsConstructor;
 /**
  * Location
  * 
- * @param longitude longitude
- * @param latitude  latitude
- * @param name      name
- * @param address   address
  */
 @Builder
 @Data

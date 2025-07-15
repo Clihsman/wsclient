@@ -10,9 +10,6 @@ import lombok.NoArgsConstructor;
 /**
  * The Currency Object contains the following fields
  * 
- * @param fallbackValue fallbackValue
- * @param code          code
- * @param amount1000    amount1000
  */
 @Builder
 @Data

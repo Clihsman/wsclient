@@ -10,9 +10,6 @@ import lombok.NoArgsConstructor;
 /**
  * The Template Object contains the following fields
  * 
- * @param name       name
- * @param language   language
- * @param components components
  */
 @Builder
 @Data

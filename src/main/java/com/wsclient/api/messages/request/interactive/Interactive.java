@@ -22,11 +22,6 @@ import lombok.Data;
  * </li>
  * </ul>
  * 
- * @param type   type
- * @param header header
- * @param body   body
- * @param footer footer
- * @param action action
  */
 @Builder
 @Data

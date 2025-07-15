@@ -6,7 +6,6 @@ import lombok.Data;
 /**
  * InteractiveBody
  * 
- * @param text text
  */
 @Builder
 @Data

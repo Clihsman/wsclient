@@ -1,49 +1,45 @@
 package com.wsclient.api.services;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
 import org.apache.http.HttpEntity;
-import org.apache.http.ParseException;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
-import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.InputStreamBody;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.util.EntityUtils;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wsclient.api.messages.response.MediaResponse;
-import com.wsclient.api.messages.response.WhatsAppErrorResponse;
 import com.wsclient.api.validators.ConfigValidator;
-import com.wsclient.core.exceptions.WhatsAppException;
+
+import lombok.RequiredArgsConstructor;
 
 /**
  * Implementation of the {@link WhatsAppMediaService} interface that handles
  * media upload operations to the WhatsApp server.
  */
+@RequiredArgsConstructor
 public class WhatsAppMediaServiceImpl implements WhatsAppMediaService {
 
     private String whatsappApiUrl;
     private String phoneNumberId;
     private String token;
 
+    private final WhatsAppService whatsAppService;
+
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     /**
      * WhatsAppMediaServiceImpl
-     */
-    public WhatsAppMediaServiceImpl() {
-    }
-
-    /**
+     * 
+     * /**
      * Configures the WhatsApp API credentials and endpoint URL.
      * This method initializes the necessary parameters for interacting with the
      * WhatsApp API.
@@ -60,6 +56,7 @@ public class WhatsAppMediaServiceImpl implements WhatsAppMediaService {
         this.token = token;
 
         ConfigValidator.validateConfig(whatsappApiUrl, phoneNumberId, token);
+        whatsAppService.configureWhatsAppApi(whatsappApiUrl, phoneNumberId, token);
     }
 
     /**
@@ -73,19 +70,18 @@ public class WhatsAppMediaServiceImpl implements WhatsAppMediaService {
      * @throws IOException if an I/O error occurs during the upload process.
      */
     @Override
-    public CompletableFuture<String> uploadMedia(InputStream media, String fileName, String type) throws IOException {
+    public CompletableFuture<MediaResponse> uploadMedia(InputStream media, String fileName, String type)
+            throws IOException {
         return CompletableFuture.supplyAsync(() -> {
             try {
-                final HttpPost httpPost = createHttpPost();
+                validateInput(media, fileName, type);
 
-                final MultipartEntityBuilder builder = MultipartEntityBuilder.create();
-                builder.addPart("file", new InputStreamBody(media, ContentType.create(type), fileName));
-                builder.addTextBody("type", type);
-                final HttpEntity entity = builder.build();
+                final HttpPost httpPost = createHttpPost();
+                final HttpEntity entity = createEntity(media, fileName, type);
                 httpPost.setEntity(entity);
 
-                sendRequest(httpPost);
-                return "";
+                String responseBody = whatsAppService.sendRequest(httpPost);
+                return parseMediaResponse(responseBody);
             } catch (Exception ex) {
                 throw new CompletionException(ex);
             }
@@ -109,21 +105,44 @@ public class WhatsAppMediaServiceImpl implements WhatsAppMediaService {
             throws IOException {
         return CompletableFuture.supplyAsync(() -> {
             try {
+                validateInput(filePath, fileName, type);
                 final HttpPost httpPost = createHttpPost();
 
-                final MultipartEntityBuilder builder = MultipartEntityBuilder.create();
                 final File file = new File(filePath);
-                builder.addPart("file", new FileBody(file, ContentType.create(type), fileName));
-                builder.addTextBody("type", type);
-                final HttpEntity entity = builder.build();
-                httpPost.setEntity(entity);
+                FileInputStream fileInputStream = new FileInputStream(file);
+                final HttpEntity entity = createEntity(fileInputStream, type, fileName);
 
-                String responseBody = sendRequest(httpPost);
+                httpPost.setEntity(entity);
+                String responseBody = whatsAppService.sendRequest(httpPost);
                 return parseMediaResponse(responseBody);
             } catch (Exception ex) {
                 throw new CompletionException(ex);
             }
         });
+    }
+
+    /**
+     * Builds a multipart HTTP entity containing the media file and type metadata.
+     * <p>
+     * This entity is suitable for uploading media to the WhatsApp API,
+     * using the standard 'file' part for binary content and a 'type'
+     * part for the MIME type.
+     * </p>
+     *
+     * @param inputStream the InputStream of the media content; must not be
+     *                    {@code null}.
+     * @param type        the MIME type of the media (e.g. "image/jpeg"); must not
+     *                    be {@code null} or blank.
+     * @param fileName    the name to assign to the uploaded file; must not be
+     *                    {@code null} or blank.
+     * @return a configured {@link HttpEntity} ready to be sent in a
+     *         multipart/form-data request.
+     */
+    private HttpEntity createEntity(InputStream inputStream, String type, String fileName) {
+        return MultipartEntityBuilder.create()
+                .addPart("file", new InputStreamBody(inputStream, ContentType.create(type), fileName))
+                .addTextBody("type", type, ContentType.TEXT_PLAIN.withCharset(StandardCharsets.UTF_8))
+                .build();
     }
 
     /**
@@ -161,83 +180,55 @@ public class WhatsAppMediaServiceImpl implements WhatsAppMediaService {
     }
 
     /**
-     * Sends the given {@link HttpPost} request to the server.
+     * Validates the input parameters for a media upload operation.
      *
-     * @param httpPost the HTTP POST request to be executed.
-     * @throws IOException       if an I/O error occurs while sending the request or
-     *                           receiving the response.
-     * @throws WhatsAppException if the response indicates an error from the
-     *                           WhatsApp server.
-     * @throws ParseException    if there is an error parsing the response body.
-     * @return the response body as a string.
+     * @param media    the media input stream; must not be {@code null}.
+     * @param fileName the name of the file; must not be {@code null} or blank.
+     * @param type     the MIME type of the media; must not be {@code null} or
+     *                 blank.
+     * @throws IllegalArgumentException if any parameter is invalid.
      */
-    private String sendRequest(HttpPost httpPost) throws IOException, ParseException, WhatsAppException {
-        try (CloseableHttpClient httpClient = HttpClientBuilder.create()
-                .build()) {
-
-            try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
-
-                HttpEntity responseEntity = response.getEntity();
-
-                if (responseEntity == null) {
-                    throw new IOException("No response received from the server.");
-                }
-
-                throwIfErrorResponse(response);
-
-                String body = EntityUtils.toString(responseEntity);
-                EntityUtils.consume(responseEntity);
-
-                return body;
-            }
+    private void validateInput(InputStream media, String fileName, String type) {
+        if (media == null) {
+            throw new IllegalArgumentException("Media input stream must not be null.");
+        }
+        if (fileName == null || fileName.isBlank()) {
+            throw new IllegalArgumentException("File name must not be null or blank.");
+        }
+        if (type == null || type.isBlank()) {
+            throw new IllegalArgumentException("Media type must not be null or blank.");
         }
     }
 
     /**
-     * Checks the HTTP response for errors and throws a {@link WhatsAppException} if
-     * an error is detected.
+     * Validates the input parameters for a media upload operation using a file
+     * path.
      *
-     * <p>
-     * This method verifies if the response status code is different from 200. If an
-     * error is present,
-     * it attempts to parse the error details from the response body and throws a
-     * {@link WhatsAppException}
-     * containing relevant error information. If the response body cannot be parsed,
-     * a generic parsing
-     * error exception is thrown.
-     * </p>
-     *
-     * @param response the HTTP response to check.
-     * @throws WhatsAppException if the response contains an error, including
-     *                           parsing failures.
-     * @throws IOException       if an I/O error occurs while reading the response
-     *                           body.
-     * @throws ParseException    if there is an error parsing the response body.
-     * @see WhatsAppException
+     * @param filePath the full path to the media file; must not be {@code null} or
+     *                 blank.
+     * @param fileName the name to assign to the uploaded file; must not be
+     *                 {@code null} or blank.
+     * @param type     the MIME type of the media (e.g., "image/png"); must not be
+     *                 {@code null} or blank.
+     * @throws IllegalArgumentException if any parameter is invalid.
      */
-    private void throwIfErrorResponse(CloseableHttpResponse response)
-            throws WhatsAppException, ParseException, IOException {
-        int statusCode = response.getStatusLine().getStatusCode();
+    private void validateInput(String filePath, String fileName, String type) {
+        if (filePath == null || filePath.isBlank()) {
+            throw new IllegalArgumentException("File path must not be null or blank.");
+        }
 
-        if (statusCode != 200) {
-            try {
-                final HttpEntity responseEntity = response.getEntity();
-                String body = EntityUtils.toString(responseEntity);
-                WhatsAppErrorResponse whatsAppErrorResponse = OBJECT_MAPPER.readValue(body,
-                        WhatsAppErrorResponse.class);
+        if (fileName == null || fileName.isBlank()) {
+            throw new IllegalArgumentException("File name must not be null or blank.");
+        }
 
-                EntityUtils.consume(responseEntity);
+        if (type == null || type.isBlank()) {
+            throw new IllegalArgumentException("Media type must not be null or blank.");
+        }
 
-                throw new WhatsAppException(
-                        whatsAppErrorResponse.error().message(),
-                        whatsAppErrorResponse.error().type(),
-                        whatsAppErrorResponse.error().code(),
-                        whatsAppErrorResponse.error().errorSubcode(),
-                        whatsAppErrorResponse.error().fbtraceId());
-            } catch (JsonProcessingException e) {
-                throw new WhatsAppException("Failed to parse error response", "ParsingError",
-                        statusCode, 0, null, e);
-            }
+        File file = new File(filePath);
+        if (!file.exists() || !file.isFile()) {
+            throw new IllegalArgumentException("File does not exist or is not a valid file: " + filePath);
         }
     }
+
 }

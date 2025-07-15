@@ -3,6 +3,9 @@ package com.wsclient.api.services;
 import java.io.IOException;
 import java.util.Map;
 
+import org.apache.http.ParseException;
+import org.apache.http.client.methods.HttpPost;
+
 import com.wsclient.api.messages.response.WhatsAppResponse;
 import com.wsclient.core.exceptions.WhatsAppException;
 
@@ -54,5 +57,19 @@ public interface WhatsAppService {
      * @throws InterruptedException If the operation is interrupted.
      * @throws WhatsAppException    If the API response contains an error.
      */
-    WhatsAppResponse sendRequest(Map<String, Object> data) throws IOException, InterruptedException, WhatsAppException;
+    public WhatsAppResponse sendRequest(Map<String, Object> data)
+            throws IOException, InterruptedException, WhatsAppException;
+
+    /**
+     * Sends the given {@link HttpPost} request to the server.
+     *
+     * @param httpPost the HTTP POST request to be executed.
+     * @throws IOException       if an I/O error occurs while sending the request or
+     *                           receiving the response.
+     * @throws WhatsAppException if the response indicates an error from the
+     *                           WhatsApp server.
+     * @throws ParseException    if there is an error parsing the response body.
+     * @return the response body as a string.
+     */
+    public String sendRequest(HttpPost httpPost) throws IOException, ParseException, WhatsAppException;
 }

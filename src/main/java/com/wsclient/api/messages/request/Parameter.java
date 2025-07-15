@@ -11,12 +11,6 @@ import lombok.NoArgsConstructor;
 /**
  * The Parameter Object contains the following fields
  * 
- * @param type     type
- * @param text     text
- * @param currency currency
- * @param dateTime dateTime
- * @param image    image
- * @param document document
  */
 @Builder
 @Data

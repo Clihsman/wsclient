@@ -9,9 +9,6 @@ import lombok.NoArgsConstructor;
 
 /**
  * A Text Object consists of the following fields and formatting options
- * 
- * @param body       body
- * @param previewUrl previewUrl
  */
 @Builder
 @Data

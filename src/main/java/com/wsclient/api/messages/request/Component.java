@@ -10,8 +10,6 @@ import lombok.NoArgsConstructor;
 /**
  * The Components Object contains the following fields
  * 
- * @param type       type
- * @param parameters parameters
  */
 @Builder
 @Data

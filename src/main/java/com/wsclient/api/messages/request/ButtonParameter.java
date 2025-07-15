@@ -8,9 +8,6 @@ import lombok.NoArgsConstructor;
 /**
  * The Button Parameter Object contains the following fields
  * 
- * @param type    type
- * @param payload payload
- * @param text    text
  */
 @Builder
 @Data

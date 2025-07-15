@@ -8,8 +8,6 @@ import lombok.NoArgsConstructor;
 /**
  * The Language Object contains the following fields
  * 
- * @param policy policy
- * @param code   code
  */
 @Builder
 @Data

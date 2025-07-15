@@ -7,6 +7,14 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Map;
 
+import org.apache.http.HttpEntity;
+import org.apache.http.ParseException;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.util.EntityUtils;
+
 import com.wsclient.api.messages.response.WhatsAppErrorResponse;
 import com.wsclient.api.messages.response.WhatsAppResponse;
 import com.wsclient.api.validators.ConfigValidator;
@@ -38,7 +46,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class WhatsAppServiceImpl implements WhatsAppService {
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper(); 
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
 
     private String whatsappApiUrl;
     private String phoneNumberId;
@@ -95,6 +103,39 @@ public class WhatsAppServiceImpl implements WhatsAppService {
         HttpRequest httpRequest = createHttpRequest(data);
         HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
         return getWhatsAppResponse(response);
+    }
+
+    /**
+     * Sends the given {@link HttpPost} request to the server.
+     *
+     * @param httpPost the HTTP POST request to be executed.
+     * @throws IOException       if an I/O error occurs while sending the request or
+     *                           receiving the response.
+     * @throws WhatsAppException if the response indicates an error from the
+     *                           WhatsApp server.
+     * @throws ParseException    if there is an error parsing the response body.
+     * @return the response body as a string.
+     */
+    public String sendRequest(HttpPost httpPost) throws IOException, ParseException, WhatsAppException {
+        try (CloseableHttpClient httpClient = HttpClientBuilder.create()
+                .build()) {
+
+            try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
+
+                HttpEntity responseEntity = response.getEntity();
+
+                if (responseEntity == null) {
+                    throw new IOException("No response received from the server.");
+                }
+
+                throwIfErrorResponse(response);
+
+                String body = EntityUtils.toString(responseEntity);
+                EntityUtils.consume(responseEntity);
+
+                return body;
+            }
+        }
     }
 
     /**
@@ -169,7 +210,8 @@ public class WhatsAppServiceImpl implements WhatsAppService {
 
         if (statusCode != 200) {
             try {
-                WhatsAppErrorResponse whatsAppErrorResponse = OBJECT_MAPPER.readValue(response.body(), WhatsAppErrorResponse.class);
+                WhatsAppErrorResponse whatsAppErrorResponse = OBJECT_MAPPER.readValue(response.body(),
+                        WhatsAppErrorResponse.class);
                 throw new WhatsAppException(
                         whatsAppErrorResponse.error().message(),
                         whatsAppErrorResponse.error().type(),
@@ -182,4 +224,53 @@ public class WhatsAppServiceImpl implements WhatsAppService {
             }
         }
     }
+
+    /**
+     * Checks the HTTP response for errors and throws a {@link WhatsAppException} if
+     * an error is detected.
+     *
+     * <p>
+     * This method verifies if the response status code is different from 200. If an
+     * error is present,
+     * it attempts to parse the error details from the response body and throws a
+     * {@link WhatsAppException}
+     * containing relevant error information. If the response body cannot be parsed,
+     * a generic parsing
+     * error exception is thrown.
+     * </p>
+     *
+     * @param response the HTTP response to check.
+     * @throws WhatsAppException if the response contains an error, including
+     *                           parsing failures.
+     * @throws IOException       if an I/O error occurs while reading the response
+     *                           body.
+     * @throws ParseException    if there is an error parsing the response body.
+     * @see WhatsAppException
+     */
+    private void throwIfErrorResponse(CloseableHttpResponse response)
+            throws WhatsAppException, ParseException, IOException {
+        int statusCode = response.getStatusLine().getStatusCode();
+
+        if (statusCode != 200) {
+            try {
+                final HttpEntity responseEntity = response.getEntity();
+                String body = EntityUtils.toString(responseEntity);
+                WhatsAppErrorResponse whatsAppErrorResponse = OBJECT_MAPPER.readValue(body,
+                        WhatsAppErrorResponse.class);
+
+                EntityUtils.consume(responseEntity);
+
+                throw new WhatsAppException(
+                        whatsAppErrorResponse.error().message(),
+                        whatsAppErrorResponse.error().type(),
+                        whatsAppErrorResponse.error().code(),
+                        whatsAppErrorResponse.error().errorSubcode(),
+                        whatsAppErrorResponse.error().fbtraceId());
+            } catch (JsonProcessingException e) {
+                throw new WhatsAppException("Failed to parse error response", "ParsingError",
+                        statusCode, 0, null, e);
+            }
+        }
+    }
+
 }

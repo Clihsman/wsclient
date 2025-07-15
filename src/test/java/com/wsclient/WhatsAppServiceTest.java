@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test;
 import com.wsclient.api.services.WhatsAppService;
 import com.wsclient.api.services.WhatsAppServiceImpl;
 
-public class WhatsAppServiceImpTest {
+public class WhatsAppServiceTest {
 
     private WhatsAppService whatsAppService = new WhatsAppServiceImpl();
 

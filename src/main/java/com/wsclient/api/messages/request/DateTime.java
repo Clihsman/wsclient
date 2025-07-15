@@ -11,14 +11,6 @@ import lombok.NoArgsConstructor;
 /**
  * The DateTime Object contains the following fields
  * 
- * @param fallbackValue fallbackValue
- * @param dayOfWeek     dayOfWeek
- * @param yaer          yaer
- * @param month         month
- * @param dayOfMonth    dayOfMonth
- * @param hour          hour
- * @param minute        minute
- * @param calendar      calendar
  */
 @Builder
 @Data
