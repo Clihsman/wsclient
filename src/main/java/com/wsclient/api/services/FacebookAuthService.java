@@ -14,6 +14,5 @@ public interface FacebookAuthService {
      *         token_type.
      * @throws Exception if the request fails.
      */
-    public CompletableFuture<FBAccessToken> getAppAccessToken(String clientId, String clientSecret)
-            throws Exception;
+    public CompletableFuture<FBAccessToken> getAppAccessToken(String clientId, String clientSecret);
 }
