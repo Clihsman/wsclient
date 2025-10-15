@@ -22,7 +22,7 @@ import org.apache.http.util.EntityUtils;
 
 import com.wsclient.api.messages.response.WhatsAppErrorResponse;
 import com.wsclient.api.messages.response.WhatsAppResponse;
-import com.wsclient.api.messages.response.template.ResponseTemplate;
+import com.wsclient.api.messages.response.template.TemplatesResponse;
 import com.wsclient.api.validators.ConfigValidator;
 import com.wsclient.core.exceptions.WhatsAppException;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -283,7 +283,7 @@ public class WhatsAppServiceImpl implements WhatsAppService {
     }
 
     @Override
-    public CompletableFuture<ResponseTemplate> getTamplates() {
+    public CompletableFuture<TemplatesResponse> getTamplates() {
         return CompletableFuture.supplyAsync(() -> {
             Objects.nonNull(businessAccount);
 
@@ -308,7 +308,7 @@ public class WhatsAppServiceImpl implements WhatsAppService {
                 String body = EntityUtils.toString(responseEntity);
                 EntityUtils.consume(responseEntity);
 
-                return OBJECT_MAPPER.readValue(body, ResponseTemplate.class);
+                return OBJECT_MAPPER.readValue(body, TemplatesResponse.class);
 
             } catch (IOException | ParseException | WhatsAppException e) {
                 throw new CompletionException("Failed to fetch WhatsApp templates", e);

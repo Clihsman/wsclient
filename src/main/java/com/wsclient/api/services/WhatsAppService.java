@@ -8,7 +8,7 @@ import org.apache.http.ParseException;
 import org.apache.http.client.methods.HttpPost;
 
 import com.wsclient.api.messages.response.WhatsAppResponse;
-import com.wsclient.api.messages.response.template.ResponseTemplate;
+import com.wsclient.api.messages.response.template.TemplatesResponse;
 import com.wsclient.core.exceptions.WhatsAppException;
 
 /**
@@ -94,8 +94,8 @@ public interface WhatsAppService {
      * </p>
      *
      * @return A {@link CompletableFuture} that resolves to a
-     *         {@link ResponseTemplate}
+     *         {@link TemplatesResponse}
      *         containing the list of available templates.
      */
-    public CompletableFuture<ResponseTemplate> getTamplates();
+    public CompletableFuture<TemplatesResponse> getTamplates();
 }
