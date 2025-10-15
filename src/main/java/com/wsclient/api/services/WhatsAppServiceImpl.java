@@ -6,10 +6,15 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.ParseException;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -17,6 +22,7 @@ import org.apache.http.util.EntityUtils;
 
 import com.wsclient.api.messages.response.WhatsAppErrorResponse;
 import com.wsclient.api.messages.response.WhatsAppResponse;
+import com.wsclient.api.messages.response.template.ResponseTemplate;
 import com.wsclient.api.validators.ConfigValidator;
 import com.wsclient.core.exceptions.WhatsAppException;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -50,6 +56,7 @@ public class WhatsAppServiceImpl implements WhatsAppService {
 
     private String whatsappApiUrl;
     private String phoneNumberId;
+    private String businessAccount;
     private String token;
 
     private final HttpClient httpClient;
@@ -78,9 +85,11 @@ public class WhatsAppServiceImpl implements WhatsAppService {
      *                       account.
      * @param token          The authentication token for API access.
      */
-    public void configureWhatsAppApi(String whatsappApiUrl, String phoneNumberId, String token) {
+    public void configureWhatsAppApi(String whatsappApiUrl, String phoneNumberId, String businessAccount,
+            String token) {
         this.whatsappApiUrl = whatsappApiUrl;
         this.phoneNumberId = phoneNumberId;
+        this.businessAccount = Optional.ofNullable(businessAccount).orElse(this.businessAccount);
         this.token = token;
 
         ConfigValidator.validateConfig(whatsappApiUrl, phoneNumberId, token);
@@ -271,6 +280,40 @@ public class WhatsAppServiceImpl implements WhatsAppService {
                         statusCode, 0, null, e);
             }
         }
+    }
+
+    @Override
+    public CompletableFuture<ResponseTemplate> getTamplates() {
+        return CompletableFuture.supplyAsync(() -> {
+            Objects.nonNull(businessAccount);
+
+            String url = String.format("%s/%s/message_templates?access_token=%s",
+                    whatsappApiUrl,
+                    businessAccount,
+                    token);
+
+            HttpGet httpGet = new HttpGet(url);
+            httpGet.setHeader("Accept", "application/json");
+
+            try (CloseableHttpClient client = HttpClientBuilder.create().build();
+                    CloseableHttpResponse response = client.execute(httpGet)) {
+
+                HttpEntity responseEntity = response.getEntity();
+                if (responseEntity == null) {
+                    throw new IOException("No response received from the WhatsApp API.");
+                }
+
+                throwIfErrorResponse(response);
+
+                String body = EntityUtils.toString(responseEntity);
+                EntityUtils.consume(responseEntity);
+
+                return OBJECT_MAPPER.readValue(body, ResponseTemplate.class);
+
+            } catch (IOException | ParseException | WhatsAppException e) {
+                throw new CompletionException("Failed to fetch WhatsApp templates", e);
+            }
+        });
     }
 
 }

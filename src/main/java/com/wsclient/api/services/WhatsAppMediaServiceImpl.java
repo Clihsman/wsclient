@@ -56,7 +56,7 @@ public class WhatsAppMediaServiceImpl implements WhatsAppMediaService {
         this.token = token;
 
         ConfigValidator.validateConfig(whatsappApiUrl, phoneNumberId, token);
-        whatsAppService.configureWhatsAppApi(whatsappApiUrl, phoneNumberId, token);
+        whatsAppService.configureWhatsAppApi(whatsappApiUrl, phoneNumberId, null, token);
     }
 
     /**

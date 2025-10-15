@@ -59,7 +59,7 @@ public class WhatsAppClientImpl implements WhatsAppClient {
      */
     @Override
     public void configureWhatsAppApi(String whatsappApiUrl, String phoneNumberId, String token) {
-        whatsAppService.configureWhatsAppApi(whatsappApiUrl, phoneNumberId, token);
+        whatsAppService.configureWhatsAppApi(whatsappApiUrl, phoneNumberId, null, token);
     }
 
     /**

@@ -87,5 +87,4 @@ public interface WhatsAppClient {
          *         The future completes when the request is processed.
          */
         public CompletableFuture<WhatsAppResponse> markMessageAsRead(String messageId);
-
 }

@@ -15,49 +15,49 @@ public class WhatsAppServiceTest {
     @Test
     void testConfigureWhatsAppApi_NullApiUrl() {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> whatsAppService.configureWhatsAppApi(null, "123456789", "validToken"));
+                () -> whatsAppService.configureWhatsAppApi(null, "123456789", null, "validToken"));
         assertEquals("WhatsApp API URL cannot be null or empty.", exception.getMessage());
     }
 
     @Test
     void testConfigureWhatsAppApi_EmptyApiUrl() {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> whatsAppService.configureWhatsAppApi("", "123456789", "validToken"));
+                () -> whatsAppService.configureWhatsAppApi("", "123456789", null, "validToken"));
         assertEquals("WhatsApp API URL cannot be null or empty.", exception.getMessage());
     }
 
     @Test
     void testConfigureWhatsAppApi_NullPhoneNumberId() {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> whatsAppService
-                .configureWhatsAppApi("https://api.whatsapp.com", null, "validToken"));
+                .configureWhatsAppApi("https://api.whatsapp.com", null, null, "validToken"));
         assertEquals("Phone number ID cannot be null or empty.", exception.getMessage());
     }
 
     @Test
     void testConfigureWhatsAppApi_EmptyPhoneNumberId() {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> whatsAppService
-                .configureWhatsAppApi("https://api.whatsapp.com", "", "validToken"));
+                .configureWhatsAppApi("https://api.whatsapp.com", "", null, "validToken"));
         assertEquals("Phone number ID cannot be null or empty.", exception.getMessage());
     }
 
     @Test
     void testConfigureWhatsAppApi_InvalidPhoneNumberId() {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> whatsAppService
-                .configureWhatsAppApi("https://api.whatsapp.com", "123ABC456", "validToken"));
+                .configureWhatsAppApi("https://api.whatsapp.com", "123ABC456", null, "validToken"));
         assertEquals("Phone number ID must contain only digits.", exception.getMessage());
     }
 
     @Test
     void testConfigureWhatsAppApi_NullToken() {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> whatsAppService
-                .configureWhatsAppApi("https://api.whatsapp.com", "123456789", null));
+                .configureWhatsAppApi("https://api.whatsapp.com", "123456789", null, null));
         assertEquals("Token cannot be null or empty.", exception.getMessage());
     }
 
     @Test
     void testConfigureWhatsAppApi_EmptyToken() {
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class,
-                () -> whatsAppService.configureWhatsAppApi("https://api.whatsapp.com", "123456789", ""));
+                () -> whatsAppService.configureWhatsAppApi("https://api.whatsapp.com", "123456789", null, ""));
         assertEquals("Token cannot be null or empty.", exception.getMessage());
     }
 }
