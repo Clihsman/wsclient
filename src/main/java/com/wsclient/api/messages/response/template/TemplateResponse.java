@@ -10,7 +10,7 @@ import lombok.Getter;
 public class TemplateResponse {
     private String id;
     private String name;
-    private Language language;
+    private String language;
     private String status;
     private String category;
     @JsonProperty("parameter_format")
