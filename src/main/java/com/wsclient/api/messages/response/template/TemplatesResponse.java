@@ -6,5 +6,5 @@ import lombok.Getter;
 
 @Getter
 public class TemplatesResponse {
-    private List<ResponseTemplate> data;
+    private List<TemplateResponse> data;
 }

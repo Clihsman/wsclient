@@ -308,6 +308,8 @@ public class WhatsAppServiceImpl implements WhatsAppService {
                 String body = EntityUtils.toString(responseEntity);
                 EntityUtils.consume(responseEntity);
 
+                System.out.println(body);
+
                 return OBJECT_MAPPER.readValue(body, TemplatesResponse.class);
 
             } catch (IOException | ParseException | WhatsAppException e) {
