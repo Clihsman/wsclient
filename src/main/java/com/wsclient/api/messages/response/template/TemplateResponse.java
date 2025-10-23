@@ -16,5 +16,4 @@ public class TemplateResponse {
     @JsonProperty("parameter_format")
     private String parameterFormat;
     private List<Component> components;
-    private Paging paging;
 }

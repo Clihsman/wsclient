@@ -7,4 +7,5 @@ import lombok.Getter;
 @Getter
 public class TemplatesResponse {
     private List<TemplateResponse> data;
+    private Paging paging;
 }

@@ -12,7 +12,7 @@ public final class WhatsAppConstants {
     /**
      * The maximum number of characters allowed in a text message.
      */
-    public static final int MESSAGE_MAX_TEXT = 1024;
+    public static final int MESSAGE_MAX_TEXT = 4096;
 
     /**
      * The minimum number of characters required in a text message.
