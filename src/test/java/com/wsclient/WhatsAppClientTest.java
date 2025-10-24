@@ -71,7 +71,7 @@ public class WhatsAppClientTest {
         public void testMessageExceedsMaxLength() {
                 // Arrange
                 final String validTo = "3001111222"; // Un número válido
-                final String exampleBody = "A".repeat(1025); // Excede el límite de 1024 caracteres
+                final String exampleBody = "A".repeat(4097); // Excede el límite de 1024 caracteres
                 final Text exampleText = Text.builder().body(exampleBody).build();
 
                 // Act & Assert
