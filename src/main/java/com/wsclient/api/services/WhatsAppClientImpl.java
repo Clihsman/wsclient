@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
+import com.wsclient.api.messages.request.Media;
 import com.wsclient.api.messages.request.Template;
 import com.wsclient.api.messages.request.Text;
 import com.wsclient.api.messages.request.interactive.Interactive;
@@ -70,9 +71,8 @@ public class WhatsAppClientImpl implements WhatsAppClient {
      * @return A WhatsAppResponse object containing the API response.
      */
     @Override
-    public CompletableFuture<WhatsAppResponse> sendMessageAsync(String to, Text text) {
-
-        final IllegalArgumentException exception = validateMessageInput(to, text);
+    public CompletableFuture<WhatsAppResponse> sendTextAsync(String to, Text text) {
+        final IllegalArgumentException exception = validateTextInput(to, text);
         if (exception != null) {
             return CompletableFuture.failedFuture(exception);
         }
@@ -167,6 +167,28 @@ public class WhatsAppClientImpl implements WhatsAppClient {
                 "messaging_product", "whatsapp",
                 "status", "read",
                 "message_id", messageId);
+
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                return whatsAppService.sendRequest(data);
+            } catch (Exception e) {
+                throw new CompletionException(e);
+            }
+        });
+    }
+
+    @Override
+    public CompletableFuture<WhatsAppResponse> sendImageAsync(String to, Media image) {
+        final IllegalArgumentException exception = validateImageInput(to, image);
+        if (exception != null) {
+            return CompletableFuture.failedFuture(exception);
+        }
+
+        Map<String, Object> data = Map.of(
+                "messaging_product", "whatsapp",
+                "to", to,
+                "type", "image",
+                "image", image);
 
         return CompletableFuture.supplyAsync(() -> {
             try {

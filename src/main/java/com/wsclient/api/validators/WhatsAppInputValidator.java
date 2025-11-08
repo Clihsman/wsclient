@@ -7,6 +7,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.wsclient.api.messages.request.Media;
 import com.wsclient.api.messages.request.Text;
 import com.wsclient.api.messages.request.interactive.Interactive;
 import com.wsclient.api.messages.request.interactive.InteractiveButton;
@@ -63,7 +64,7 @@ public final class WhatsAppInputValidator {
      *         otherwise,
      *         returns {@code null}.
      */
-    public static IllegalArgumentException validateMessageInput(String to, Text text) {
+    public static IllegalArgumentException validateTextInput(String to, Text text) {
 
         if (Objects.isNull(to)) {
             return new IllegalArgumentException("Recipient number cannot be null.");
@@ -226,6 +227,53 @@ public final class WhatsAppInputValidator {
 
         if (interactiveSectionRows.size() > 10) {
             throw new IllegalArgumentException("asdasd");
+        }
+
+        return null;
+    }
+
+    /**
+     * /**
+     * Validates the input parameters for sending a WhatsApp image message.
+     *
+     * @param to    The recipient's phone number in international format.
+     *              It must contain only digits (e.g., "573001112233").
+     * @param media The {@link Media} object containing the image information.
+     *              It must include either a valid {@code id} or a valid
+     *              {@code link}.
+     * @return An {@link IllegalArgumentException} if any validation fails;
+     *         otherwise, returns {@code null}.
+     */
+    public static IllegalArgumentException validateImageInput(String to, Media media) {
+
+        if (Objects.isNull(to)) {
+            return new IllegalArgumentException("Recipient number cannot be null.");
+        }
+
+        if (!to.matches("\\d+")) {
+            return new IllegalArgumentException("Invalid recipient number. The 'to' field must contain only digits.");
+        }
+
+        if (Objects.isNull(media)) {
+            return new IllegalArgumentException("Media object cannot be null.");
+        }
+
+        if ((media.getId() == null || media.getId().isBlank()) &&
+                (media.getLink() == null || media.getLink().isBlank())) {
+            return new IllegalArgumentException("Media must have either an 'id' or a 'link' defined.");
+        }
+
+        if (media.getLink() != null && !media.getLink().isBlank() &&
+                !media.getLink().matches("^https?://.+")) {
+            return new IllegalArgumentException("Invalid media link. Only HTTP/HTTPS URLs are allowed.");
+        }
+
+        if (media.getCaption() != null && media.getCaption().length() > 1024) {
+            return new IllegalArgumentException("Caption exceeds maximum length of 1024 characters.");
+        }
+
+        if (media.getFilename() != null && media.getFilename().length() > 255) {
+            return new IllegalArgumentException("Filename exceeds maximum length of 255 characters.");
         }
 
         return null;

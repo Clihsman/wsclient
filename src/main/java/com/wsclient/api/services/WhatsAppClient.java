@@ -2,6 +2,7 @@ package com.wsclient.api.services;
 
 import java.util.concurrent.CompletableFuture;
 
+import com.wsclient.api.messages.request.Media;
 import com.wsclient.api.messages.request.Template;
 import com.wsclient.api.messages.request.Text;
 import com.wsclient.api.messages.request.interactive.Interactive;
@@ -51,7 +52,18 @@ public interface WhatsAppClient {
          * @param text The text message to send.
          * @return A WhatsAppResponse object containing the API response.
          */
-        public CompletableFuture<WhatsAppResponse> sendMessageAsync(String to, Text text);
+        public CompletableFuture<WhatsAppResponse> sendTextAsync(String to, Text text);
+
+        /**
+         * Sends a WhatsApp image message to a specified recipient.
+         *
+         * @param to    The recipient's phone number in international format.
+         * @param media The image media object containing the image URL or ID, caption,
+         *              and optional metadata.
+         * @return A CompletableFuture that resolves to a WhatsAppResponse object
+         *         containing the API response.
+         */
+        public CompletableFuture<WhatsAppResponse> sendImageAsync(String to, Media image);
 
         /**
          * Sends a WhatsApp interactive message to a specified recipient.

@@ -57,7 +57,7 @@ public class WhatsAppClientTest {
                 // Act & Assert
                 CompletionException exception = assertThrows(
                                 CompletionException.class,
-                                () -> whatsAppClient.sendMessageAsync(invalidTo, exampleText).join());
+                                () -> whatsAppClient.sendTextAsync(invalidTo, exampleText).join());
 
                 // Verifica que la excepción tenga el mensaje esperado
                 Throwable cause = exception.getCause();
@@ -77,7 +77,7 @@ public class WhatsAppClientTest {
                 // Act & Assert
                 CompletionException exception = assertThrows(
                                 CompletionException.class,
-                                () -> whatsAppClient.sendMessageAsync(validTo, exampleText).join());
+                                () -> whatsAppClient.sendTextAsync(validTo, exampleText).join());
 
                 // Verifica que la excepción no sea nula
                 assertNotNull(exception.getCause(), "Exception cause should not be null");
@@ -106,7 +106,7 @@ public class WhatsAppClientTest {
                 // Act & Assert
                 CompletionException exception = assertThrows(
                                 CompletionException.class,
-                                () -> whatsAppClient.sendMessageAsync(validTo, exampleText).join());
+                                () -> whatsAppClient.sendTextAsync(validTo, exampleText).join());
 
                 // Verifica que la excepción no sea nula
                 Throwable cause = exception.getCause();
@@ -141,7 +141,7 @@ public class WhatsAppClientTest {
                 when(whatsAppService.sendRequest(requestData)).thenReturn(expectedResponse);
 
                 // Act: Llamar al método bajo prueba
-                final WhatsAppResponse actualResponse = whatsAppClient.sendMessageAsync(validPhoneNumber, exampleText)
+                final WhatsAppResponse actualResponse = whatsAppClient.sendTextAsync(validPhoneNumber, exampleText)
                                 .join();
 
                 // Assert: Validar que la respuesta es correcta
