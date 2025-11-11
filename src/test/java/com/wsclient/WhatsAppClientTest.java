@@ -34,7 +34,7 @@ public class WhatsAppClientTest {
         @Mock
         private WhatsAppService whatsAppService;
         private WhatsAppClient whatsAppClient;
-
+ 
         @BeforeEach
         void setUp() {
                 MockitoAnnotations.openMocks(this);
