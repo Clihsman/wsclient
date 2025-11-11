@@ -12,7 +12,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletionException;
 
@@ -21,15 +20,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import com.wsclient.api.messages.factory.InteractiveFactory;
 import com.wsclient.api.messages.request.Text;
 import com.wsclient.api.messages.request.interactive.Interactive;
-import com.wsclient.api.messages.request.interactive.InteractiveAction;
-import com.wsclient.api.messages.request.interactive.InteractiveBody;
-import com.wsclient.api.messages.request.interactive.InteractiveButton;
-import com.wsclient.api.messages.request.interactive.InteractiveButtonReply;
-import com.wsclient.api.messages.request.interactive.InteractiveSection;
-import com.wsclient.api.messages.request.interactive.InteractiveSectionRow;
-import com.wsclient.api.messages.request.interactive.Interactive.InteractiveType;
 import com.wsclient.api.messages.response.WhatsAppResponse;
 import com.wsclient.api.services.WhatsAppClient;
 import com.wsclient.api.services.WhatsAppClientImpl;
@@ -48,87 +41,64 @@ public class WhatsAppClientTest {
                 whatsAppClient = new WhatsAppClientImpl(whatsAppService);
         }
 
+        // ===========================
+        // TEXT MESSAGE VALIDATIONS
+        // ===========================
+
         @Test
         public void testInvalidRecipientNumber() {
-                // Arrange
-                final String invalidTo = "3001111A"; // Contiene una letra, lo que lo hace inválido
+                final String invalidTo = "3001111A";
                 final Text exampleText = Text.builder().body("Example Body").build();
 
-                // Act & Assert
                 CompletionException exception = assertThrows(
                                 CompletionException.class,
                                 () -> whatsAppClient.sendTextAsync(invalidTo, exampleText).join());
 
-                // Verifica que la excepción tenga el mensaje esperado
                 Throwable cause = exception.getCause();
-                assertNotNull(cause, "Exception cause should not be null");
-                assertTrue(cause instanceof IllegalArgumentException,
-                                "Cause should be of type IllegalArgumentException");
+                assertNotNull(cause);
+                assertInstanceOf(IllegalArgumentException.class, cause);
                 assertEquals("Invalid recipient number. The 'to' field must contain only digits.", cause.getMessage());
         }
 
         @Test
         public void testMessageExceedsMaxLength() {
-                // Arrange
-                final String validTo = "3001111222"; // Un número válido
-                final String exampleBody = "A".repeat(4097); // Excede el límite de 1024 caracteres
+                final String validTo = "3001111222";
+                final String exampleBody = "A".repeat(4097);
                 final Text exampleText = Text.builder().body(exampleBody).build();
 
-                // Act & Assert
                 CompletionException exception = assertThrows(
                                 CompletionException.class,
                                 () -> whatsAppClient.sendTextAsync(validTo, exampleText).join());
 
-                // Verifica que la excepción no sea nula
-                assertNotNull(exception.getCause(), "Exception cause should not be null");
-
-                // Verifica que la excepción sea del tipo correcto
                 Throwable cause = exception.getCause();
-
-                assertInstanceOf(IllegalArgumentException.class, cause,
-                                "Cause should be of type IllegalArgumentException");
-
-                // Verifica que el mensaje de error sea el esperado
+                assertNotNull(cause);
+                assertInstanceOf(IllegalArgumentException.class, cause);
                 assertEquals(
-                                String.format("Message exceeds max length of %d characters.",
-                                                MESSAGE_MAX_TEXT),
-                                cause.getMessage(),
-                                "Error message should indicate text length limit exceeded");
+                                String.format("Message exceeds max length of %d characters.", MESSAGE_MAX_TEXT),
+                                cause.getMessage());
         }
 
         @Test
         public void testMessageBelowMinLength() {
-                // Arrange
-                final String validTo = "3001111222"; // Un número válido
-                final String exampleBody = ""; // Un mensaje vacío que viola la restricción de longitud mínima
-                final Text exampleText = Text.builder().body(exampleBody).build();
+                final String validTo = "3001111222";
+                final Text exampleText = Text.builder().body("").build();
 
-                // Act & Assert
                 CompletionException exception = assertThrows(
                                 CompletionException.class,
                                 () -> whatsAppClient.sendTextAsync(validTo, exampleText).join());
 
-                // Verifica que la excepción no sea nula
                 Throwable cause = exception.getCause();
-                assertNotNull(cause, "Exception cause should not be null");
-
-                // Verifica que la excepción sea del tipo correcto
-                assertInstanceOf(IllegalArgumentException.class, cause,
-                                "Cause should be of type IllegalArgumentException");
-
-                // Verifica que el mensaje de error sea el esperado
-                final String expectedMessage = String.format(
-                                "Message is too short. Minimum length allowed is %d characters.",
-                                MESSAGE_MIN_TEXT);
-
-                assertEquals(expectedMessage, cause.getMessage(),
-                                "Error message should indicate text length limit violated");
+                assertNotNull(cause);
+                assertInstanceOf(IllegalArgumentException.class, cause);
+                assertEquals(
+                                String.format("Message is too short. Minimum length allowed is %d characters.",
+                                                MESSAGE_MIN_TEXT),
+                                cause.getMessage());
         }
 
         @Test
         void sendMessageAsync_ShouldReturnResponse_WhenRequestIsSuccessful()
                         throws IOException, InterruptedException, WhatsAppException {
-                // Arrange: Datos válidos
                 final String validPhoneNumber = "3001111222";
                 final Text exampleText = Text.builder().body("Example Body").build();
                 final WhatsAppResponse expectedResponse = new WhatsAppResponse(validPhoneNumber, null, null);
@@ -140,44 +110,76 @@ public class WhatsAppClientTest {
 
                 when(whatsAppService.sendRequest(requestData)).thenReturn(expectedResponse);
 
-                // Act: Llamar al método bajo prueba
                 final WhatsAppResponse actualResponse = whatsAppClient.sendTextAsync(validPhoneNumber, exampleText)
                                 .join();
 
-                // Assert: Validar que la respuesta es correcta
                 assertEquals(expectedResponse, actualResponse);
-                verify(whatsAppService, times(1)).sendRequest(requestData); // Se llamó una vez
+                verify(whatsAppService, times(1)).sendRequest(requestData);
+        }
+
+        // ===========================
+        // INTERACTIVE MESSAGES (BUTTONS)
+        // ===========================
+
+        @Test
+        void testInteractiveButton_MissingText_ShouldThrow() {
+                final String validTo = "3001111222";
+                final Interactive invalidInteractive = InteractiveFactory.createButton()
+                                .button("1", "Option 1")
+                                .build();
+
+                CompletionException exception = assertThrows(
+                                CompletionException.class,
+                                () -> whatsAppClient.sendInteractiveAsync(validTo, invalidInteractive).join());
+
+                Throwable cause = exception.getCause();
+                assertInstanceOf(IllegalArgumentException.class, cause);
+                assertEquals("Interactive body text is required and cannot be empty.", cause.getMessage());
         }
 
         @Test
-        void sendMessageAsync_ShouldReturnResponse_WhenRequestIsSuccessful3()
+        void testInteractiveButton_NoButtons_ShouldThrow() {
+                final String validTo = "3001111222";
+                final Interactive invalidInteractive = InteractiveFactory.createButton()
+                                .text("Confirm your choice")
+                                .build();
+
+                CompletionException exception = assertThrows(
+                                CompletionException.class,
+                                () -> whatsAppClient.sendInteractiveAsync(validTo, invalidInteractive).join());
+
+                Throwable cause = exception.getCause();
+                assertInstanceOf(IllegalArgumentException.class, cause);
+                assertEquals("Button interactive must contain at least one button.", cause.getMessage());
+        }
+
+        @Test
+        void testInteractiveButton_DuplicateIds_ShouldThrow() {
+                final String validTo = "3001111222";
+                final Interactive duplicateButtons = InteractiveFactory.createButton()
+                                .text("Choose one")
+                                .button("1", "Option A")
+                                .button("1", "Option B") // Duplicate ID
+                                .build();
+
+                CompletionException exception = assertThrows(
+                                CompletionException.class,
+                                () -> whatsAppClient.sendInteractiveAsync(validTo, duplicateButtons).join());
+
+                Throwable cause = exception.getCause();
+                assertInstanceOf(IllegalArgumentException.class, cause);
+                assertTrue(cause.getMessage().contains("Duplicate button ID"));
+        }
+
+        @Test
+        void sendInteractiveButton_ShouldReturnResponse_WhenValid()
                         throws IOException, InterruptedException, WhatsAppException {
-                // Arrange: Datos válidos
                 final String validPhoneNumber = "3001111222";
 
-                final InteractiveButtonReply buttonReply = InteractiveButtonReply
-                                .builder()
-                                .id("1")
-                                .title("item1")
-                                .build();
-
-                final InteractiveButton interactiveButton = InteractiveButton.builder()
-                                .reply(buttonReply)
-                                .build();
-                final List<InteractiveButton> buttons = List.of(interactiveButton);
-
-                final InteractiveAction interactiveAction = InteractiveAction.builder().buttons(buttons).build();
-
-                final InteractiveBody interactiveBody = InteractiveBody
-                                .builder()
+                final Interactive exampleInteractive = InteractiveFactory.createButton()
                                 .text("Example Text")
-                                .build();
-
-                final Interactive exampleInteractive = Interactive
-                                .builder()
-                                .type(InteractiveType.BUTTON)
-                                .action(interactiveAction)
-                                .body(interactiveBody)
+                                .button("1", "Yes")
+                                .button("2", "No")
                                 .build();
 
                 final WhatsAppResponse expectedResponse = new WhatsAppResponse(validPhoneNumber, null, null);
@@ -190,69 +192,83 @@ public class WhatsAppClientTest {
 
                 when(whatsAppService.sendRequest(requestData)).thenReturn(expectedResponse);
 
-                // Act: Llamar al método bajo prueba
                 final WhatsAppResponse actualResponse = whatsAppClient
-                                .sendInteractiveAsync(validPhoneNumber, exampleInteractive)
-                                .join();
+                                .sendInteractiveAsync(validPhoneNumber, exampleInteractive).join();
 
-                // Assert: Validar que la respuesta es correcta
                 assertEquals(expectedResponse, actualResponse);
-                verify(whatsAppService, times(1)).sendRequest(requestData); // Se llamó una vez
+                verify(whatsAppService, times(1)).sendRequest(requestData);
+        }
+
+        // ===========================
+        // INTERACTIVE MESSAGES (LISTS)
+        // ===========================
+
+        @Test
+        void testInteractiveList_MissingButtonTitle_ShouldThrow() {
+                final String validTo = "3001111222";
+                final Interactive invalidList = InteractiveFactory.createList()
+                                .text("Choose an option:")
+                                .section("Main")
+                                .row("1", "Option A")
+                                .build(); // Missing listButton()
+
+                CompletionException exception = assertThrows(
+                                CompletionException.class,
+                                () -> whatsAppClient.sendInteractiveAsync(validTo, invalidList).join());
+
+                Throwable cause = exception.getCause();
+                assertInstanceOf(IllegalArgumentException.class, cause);
+                assertEquals("List interactive must have a list button title.", cause.getMessage());
         }
 
         @Test
-        void sendMessageAsync_ShouldReturnResponse_WhenRequestIsSuccessful2()
+        void testInteractiveList_NoSections_ShouldThrow() {
+                final String validTo = "3001111222";
+                final Interactive invalidList = InteractiveFactory.createList()
+                                .text("Choose an option:")
+                                .listButton("Options")
+                                .build();
+
+                CompletionException exception = assertThrows(
+                                CompletionException.class,
+                                () -> whatsAppClient.sendInteractiveAsync(validTo, invalidList).join());
+
+                Throwable cause = exception.getCause();
+                assertInstanceOf(IllegalArgumentException.class, cause);
+                assertEquals("List interactive must contain at least one section.", cause.getMessage());
+        }
+
+        @Test
+        void testInteractiveList_DuplicateRowIds_ShouldThrow() {
+                final String validTo = "3001111222";
+                final Interactive invalidList = InteractiveFactory.createList()
+                                .text("Choose an option:")
+                                .listButton("Options")
+                                .section("Main")
+                                .row("1", "Option A")
+                                .row("1", "Option B") // Duplicate ID
+                                .build();
+
+                CompletionException exception = assertThrows(
+                                CompletionException.class,
+                                () -> whatsAppClient.sendInteractiveAsync(validTo, invalidList).join());
+
+                Throwable cause = exception.getCause();
+                assertInstanceOf(IllegalArgumentException.class, cause);
+                assertTrue(cause.getMessage().contains("Duplicate row ID"));
+        }
+
+        @Test
+        void sendInteractiveList_ShouldReturnResponse_WhenValid()
                         throws IOException, InterruptedException, WhatsAppException {
-                // Arrange: Datos válidos
                 final String validPhoneNumber = "3001111222";
 
-                final Interactive exampleInteractive = Interactive
-                                .builder()
-                                .type(InteractiveType.LIST)
-                                .action(
-                                                InteractiveAction
-                                                                .builder()
-                                                                .sections(List.of(
-                                                                                InteractiveSection.builder()
-                                                                                                .rows(
-                                                                                                                List.of(
-                                                                                                                                InteractiveSectionRow
-                                                                                                                                                .builder()
-                                                                                                                                                .build(),
-                                                                                                                                InteractiveSectionRow
-                                                                                                                                                .builder()
-                                                                                                                                                .build(),
-                                                                                                                                InteractiveSectionRow
-                                                                                                                                                .builder()
-                                                                                                                                                .build(),
-                                                                                                                                InteractiveSectionRow
-                                                                                                                                                .builder()
-                                                                                                                                                .build(),
-                                                                                                                                InteractiveSectionRow
-                                                                                                                                                .builder()
-                                                                                                                                                .build(),
-                                                                                                                                InteractiveSectionRow
-                                                                                                                                                .builder()
-                                                                                                                                                .build(),
-                                                                                                                                InteractiveSectionRow
-                                                                                                                                                .builder()
-                                                                                                                                                .build(),
-                                                                                                                                InteractiveSectionRow
-                                                                                                                                                .builder()
-                                                                                                                                                .build(),
-                                                                                                                                InteractiveSectionRow
-                                                                                                                                                .builder()
-                                                                                                                                                .build(),
-                                                                                                                                InteractiveSectionRow
-                                                                                                                                                .builder()
-                                                                                                                                                .build()))
-                                                                                                .build()))
-                                                                .build())
-                                .body(
-                                                InteractiveBody
-                                                                .builder()
-                                                                .text("Example Text")
-                                                                .build())
+                final Interactive exampleInteractive = InteractiveFactory.createList()
+                                .text("Choose an option:")
+                                .listButton("View options")
+                                .section("Main")
+                                .row("1", "Option 1", "Desc 1")
+                                .row("2", "Option 2")
                                 .build();
 
                 final WhatsAppResponse expectedResponse = new WhatsAppResponse(validPhoneNumber, null, null);
@@ -265,15 +281,16 @@ public class WhatsAppClientTest {
 
                 when(whatsAppService.sendRequest(requestData)).thenReturn(expectedResponse);
 
-                // Act: Llamar al método bajo prueba
                 final WhatsAppResponse actualResponse = whatsAppClient
-                                .sendInteractiveAsync(validPhoneNumber, exampleInteractive)
-                                .join();
+                                .sendInteractiveAsync(validPhoneNumber, exampleInteractive).join();
 
-                // Assert: Validar que la respuesta es correcta
                 assertEquals(expectedResponse, actualResponse);
-                verify(whatsAppService, times(1)).sendRequest(requestData); // Se llamó una vez
+                verify(whatsAppService, times(1)).sendRequest(requestData);
         }
+
+        // ===========================
+        // CONFIGURATION
+        // ===========================
 
         @Test
         void testConfigureWhatsAppApi_ValidInputs() {
@@ -281,4 +298,15 @@ public class WhatsAppClientTest {
                                 "validToken"));
         }
 
+        @Test
+        void testConfigureWhatsAppApi_InvalidInputs_ShouldThrow() {
+                assertThrows(IllegalArgumentException.class,
+                                () -> whatsAppClient.configureWhatsAppApi("", "123456789", "validToken"));
+
+                assertThrows(IllegalArgumentException.class, () -> whatsAppClient
+                                .configureWhatsAppApi("https://api.whatsapp.com", "", "validToken"));
+
+                assertThrows(IllegalArgumentException.class,
+                                () -> whatsAppClient.configureWhatsAppApi("https://api.whatsapp.com", "123456789", ""));
+        }
 }

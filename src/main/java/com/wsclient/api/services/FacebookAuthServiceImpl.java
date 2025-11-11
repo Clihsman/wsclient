@@ -5,19 +5,22 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wsclient.api.webhook.FBAccessToken;
 
 public class FacebookAuthServiceImpl implements FacebookAuthService {
 
     private static final String GRAPH_API_URL = "https://graph.facebook.com/oauth/access_token";
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
+            .setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
     @Override
     public CompletableFuture<FBAccessToken> getAppAccessToken(String clientId, String clientSecret) {
@@ -29,7 +32,8 @@ public class FacebookAuthServiceImpl implements FacebookAuthService {
                     CloseableHttpResponse response = httpClient.execute(new HttpGet(url))) {
 
                 int statusCode = response.getStatusLine().getStatusCode();
-                if (statusCode != 200) {
+
+                if (statusCode != HttpStatus.SC_OK) {
                     String errorBody = response.getEntity() != null
                             ? EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8)
                             : "No response body";

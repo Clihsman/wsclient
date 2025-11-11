@@ -58,7 +58,7 @@ public interface WhatsAppClient {
          * Sends a WhatsApp image message to a specified recipient.
          *
          * @param to    The recipient's phone number in international format.
-         * @param media The image media object containing the image URL or ID, caption,
+         * @param image The image media object containing the image URL or ID, caption,
          *              and optional metadata.
          * @return A CompletableFuture that resolves to a WhatsAppResponse object
          *         containing the API response.

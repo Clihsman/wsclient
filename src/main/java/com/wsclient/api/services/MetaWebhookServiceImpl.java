@@ -4,6 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
+import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -11,6 +12,7 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.wsclient.api.messages.response.WhatsAppErrorResponse;
@@ -18,7 +20,8 @@ import com.wsclient.core.exceptions.WhatsAppException;
 
 public class MetaWebhookServiceImpl implements MetaWebhookService {
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
+            .setSerializationInclusion(JsonInclude.Include.NON_NULL);
     private String graphUrl;
 
     @Override
@@ -75,7 +78,7 @@ public class MetaWebhookServiceImpl implements MetaWebhookService {
      * @throws WhatsAppException if the response indicates an error
      */
     private void throwIfErrorResponse(int statusCode, String responseBody) throws WhatsAppException {
-        if (statusCode != 200) {
+        if (statusCode != HttpStatus.SC_OK) {
             try {
                 WhatsAppErrorResponse errorResponse = OBJECT_MAPPER.readValue(responseBody,
                         WhatsAppErrorResponse.class);

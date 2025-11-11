@@ -7,25 +7,6 @@ package com.wsclient.core.exceptions;
  * It includes details such as the error type, code, subcode, and a Facebook
  * trace ID
  * for debugging.
- * </p>
- *
- * <b>Example JSON Error Response:</b>
- * 
- * <pre>
- * {
- *   "error": {
- *     "message": "(#131006) Resource not found",
- *     "type": "OAuthException",
- *     "code": 131006,
- *     "error_data": {
- *       "messaging_product": "whatsapp",
- *       "details": "unknown contact"
- *     },
- *     "error_subcode": 2494007,
- *     "fbtrace_id": "Az8or2yhqkZfEZ-_4Qn_Bam"
- *   }
- * }
- * </pre>
  */
 public class WhatsAppException extends Exception {
 

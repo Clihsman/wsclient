@@ -2,9 +2,11 @@ package com.wsclient.api.validators;
 
 import static com.wsclient.api.constants.WhatsAppConstants.*;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import com.wsclient.api.messages.request.Media;
@@ -125,6 +127,12 @@ public final class WhatsAppInputValidator {
             return new IllegalArgumentException("Interactive message cannot be null.");
         }
 
+        if (Objects.isNull(interactive.getBody()) ||
+                interactive.getBody().getText() == null ||
+                interactive.getBody().getText().trim().isEmpty()) {
+            return new IllegalArgumentException("Interactive body text is required and cannot be empty.");
+        }
+
         if (Objects.isNull(interactive.getType())) {
             return new IllegalArgumentException("Message type cannot be null.");
         }
@@ -134,35 +142,166 @@ public final class WhatsAppInputValidator {
                 return new IllegalArgumentException("Action cannot be null for button interactive messages.");
             }
 
-            validateButtonList(interactive.getAction().getButtons());
+            final IllegalArgumentException exceptionValidateButtonList = validateButtonList(
+                    interactive.getAction().getButtons());
 
-            for (var button : interactive.getAction().getButtons()) {
-                validateButton(button);
+            if (exceptionValidateButtonList != null) {
+                return exceptionValidateButtonList;
             }
         }
 
         if (interactive.getType().equals(InteractiveType.LIST)) {
+
             if (Objects.isNull(interactive.getAction())) {
-                throw new IllegalArgumentException("Action cannot be null for list interactive messages.");
+                return new IllegalArgumentException("Action cannot be null for list interactive messages.");
             }
 
-            final IllegalArgumentException exceptionValidateButtonList = validateSectionList(
-                    interactive.getAction().getSections());
-            if (exceptionValidateButtonList != null) {
-                return exceptionValidateButtonList;
+            String buttonText = interactive.getAction().getButton();
+            if (buttonText == null || buttonText.trim().isEmpty()) {
+                return new IllegalArgumentException("List interactive must have a list button title.");
             }
-            /*
-             * for (var button : interactive.action().buttons()) {
-             * final IllegalArgumentException exceptionValidateButton =
-             * validateButton(button);
-             * if (exceptionValidateButton != null) {
-             * return exceptionValidateButton;
-             * }
-             * }
-             */
+
+            if (buttonText.length() > 20) {
+                return new IllegalArgumentException("Button text cannot exceed 20 characters.");
+            }
+
+            final IllegalArgumentException exceptionValidateSectionList = validateSectionList(
+                    interactive.getAction().getSections());
+            if (exceptionValidateSectionList != null) {
+                return exceptionValidateSectionList;
+            }
         }
 
         return null;
+    }
+
+    /**
+     * Validates that all row IDs within the provided list of interactive sections
+     * are unique.
+     *
+     * <p>
+     * This method ensures that each {@link InteractiveSectionRow} across all
+     * sections
+     * in an interactive list message has a distinct {@code id}. Duplicate row IDs
+     * are not
+     * allowed in WhatsApp interactive list templates, as each row must be uniquely
+     * identifiable
+     * when the user interacts with the message.
+     * </p>
+     *
+     * <p>
+     * If any duplicate IDs are found, this method returns an
+     * {@link IllegalArgumentException}
+     * describing the duplicated values. Otherwise, it returns {@code null},
+     * indicating that
+     * all row IDs are unique and valid.
+     * </p>
+     *
+     * <p>
+     * <strong>Example:</strong>
+     * </p>
+     * 
+     * <pre>{@code
+     * List<InteractiveSection> sections = List.of(
+     *         new InteractiveSection("Main", List.of(
+     *                 new InteractiveSectionRow("1", "Option A", null),
+     *                 new InteractiveSectionRow("2", "Option B", null))),
+     *         new InteractiveSection("Secondary", List.of(
+     *                 new InteractiveSectionRow("3", "Option C", null),
+     *                 new InteractiveSectionRow("1", "Option D", null) // <-- Duplicate ID
+     *         )));
+     *
+     * IllegalArgumentException ex = validateDuplicateRowIds(sections);
+     * if (ex != null)
+     *     throw ex; // "Duplicate row IDs found: 1"
+     * }</pre>
+     *
+     * @param interactiveSections
+     *                            the list of {@link InteractiveSection} objects to
+     *                            validate; each section may contain multiple rows
+     *
+     * @return an {@link IllegalArgumentException} if duplicate row IDs are
+     *         detected,
+     *         or {@code null} if all IDs are unique and valid
+     *
+     * @throws IllegalArgumentException
+     *                                  if the input list is {@code null} or empty,
+     *                                  since at least one section is required
+     */
+    private static IllegalArgumentException validateDuplicateRowIds(List<InteractiveSection> interactiveSections) {
+
+        if (interactiveSections == null || interactiveSections.isEmpty()) {
+            return new IllegalArgumentException("At least one section is required to check for duplicate IDs.");
+        }
+
+        List<String> allIds = interactiveSections.stream()
+                .filter(Objects::nonNull)
+                .flatMap(section -> section.getRows().stream())
+                .filter(Objects::nonNull)
+                .map(InteractiveSectionRow::getId)
+                .filter(Objects::nonNull)
+                .map(String::trim)
+                .collect(Collectors.toList());
+
+        Set<String> uniqueIds = new HashSet<>();
+        List<String> duplicates = allIds.stream()
+                .filter(id -> !uniqueIds.add(id))
+                .distinct()
+                .collect(Collectors.toList());
+
+        if (!duplicates.isEmpty()) {
+            return new IllegalArgumentException(
+                    String.format("Duplicate row IDs found: %s", String.join(", ", duplicates)));
+        }
+
+        return null; // ✅ Todo correcto
+    }
+
+    /**
+     * Validates that no duplicate button IDs exist within the provided list of
+     * interactive button replies.
+     *
+     * <p>
+     * This method is typically used for {@code InteractiveFactory.createButton()}
+     * messages.
+     * Each button must have a unique {@code id}. If duplicates are detected, an
+     * {@link IllegalArgumentException} is returned with details of the duplicated
+     * IDs.
+     * </p>
+     *
+     * @param interactiveButtonReplies list of button replies to validate
+     * @return an {@link IllegalArgumentException} describing duplicates, or
+     *         {@code null} if all IDs are unique
+     */
+    private static IllegalArgumentException validateDuplicateButtonIds(
+            List<InteractiveButtonReply> interactiveButtonReplies) {
+
+        if (interactiveButtonReplies == null || interactiveButtonReplies.isEmpty()) {
+            return new IllegalArgumentException("At least one button is required to check for duplicate IDs.");
+        }
+
+        // Extract all button IDs
+        List<String> allIds = interactiveButtonReplies.stream()
+                .filter(Objects::nonNull)
+                .map(InteractiveButtonReply::getId)
+                .filter(Objects::nonNull)
+                .map(String::trim)
+                .filter(id -> !id.isEmpty())
+                .collect(Collectors.toList());
+
+        // Find duplicates
+        Set<String> uniqueIds = new HashSet<>();
+        List<String> duplicates = allIds.stream()
+                .filter(id -> !uniqueIds.add(id))
+                .distinct()
+                .collect(Collectors.toList());
+
+        if (!duplicates.isEmpty()) {
+            return new IllegalArgumentException(
+                    String.format("Duplicate button IDs found: %s", String.join(", ", duplicates)));
+        }
+
+        return null; // ✅ All IDs are unique
     }
 
     /**
@@ -175,7 +314,7 @@ public final class WhatsAppInputValidator {
      */
     private static IllegalArgumentException validateButtonList(List<InteractiveButton> buttons) {
         if (buttons == null || buttons.isEmpty()) {
-            throw new IllegalArgumentException("Buttons list cannot be null or empty.");
+            return new IllegalArgumentException("Button interactive must contain at least one button.");
         }
 
         int buttonCount = buttons.size();
@@ -190,7 +329,14 @@ public final class WhatsAppInputValidator {
                     String.format("A maximum of %d buttons are allowed.", INTERACTIVE_MAX_BUTTONS));
         }
 
-        return null;
+        for (InteractiveButton interactiveButton : buttons) {
+            final IllegalArgumentException exceptionValidateButton = validateButton(interactiveButton);
+            if (exceptionValidateButton != null)
+                return exceptionValidateButton;
+        }
+
+        return validateDuplicateButtonIds(
+                buttons.stream().map(e -> e.getReply()).toList());
     }
 
     /**
@@ -210,11 +356,11 @@ public final class WhatsAppInputValidator {
                 .orElseThrow(() -> new IllegalArgumentException("Button title cannot be null."));
 
         if (titleLength < 1) {
-            throw new IllegalArgumentException("Button title must contain at least 1 character.");
+            return new IllegalArgumentException("Button title must contain at least 1 character.");
         }
 
         if (titleLength > 20) {
-            throw new IllegalArgumentException("Button title cannot exceed 20 characters.");
+            return new IllegalArgumentException("Button title cannot exceed 20 characters.");
         }
 
         return null;
@@ -222,14 +368,63 @@ public final class WhatsAppInputValidator {
 
     private static IllegalArgumentException validateSectionList(List<InteractiveSection> interactiveSections) {
 
-        List<InteractiveSectionRow> interactiveSectionRows = interactiveSections.stream()
-                .map(InteractiveSection::getRows).flatMap(List::stream).collect(Collectors.toList());
-
-        if (interactiveSectionRows.size() > 10) {
-            throw new IllegalArgumentException("asdasd");
+        if (interactiveSections == null || interactiveSections.isEmpty()) {
+            return new IllegalArgumentException("List interactive must contain at least one section.");
         }
 
-        return null;
+        if (interactiveSections.size() > 10) {
+            return new IllegalArgumentException("You can include up to 10 sections maximum.");
+        }
+
+        IllegalArgumentException duplicateError = validateDuplicateRowIds(interactiveSections);
+        if (duplicateError != null)
+            return duplicateError;
+
+        // Validar cada sección individual
+        for (InteractiveSection section : interactiveSections) {
+
+            if (section.getTitle() == null || section.getTitle().trim().isEmpty()) {
+                return new IllegalArgumentException("Each section must have a title.");
+            }
+
+            if (section.getTitle().length() > 24) {
+                return new IllegalArgumentException("Section title cannot exceed 24 characters.");
+            }
+
+            List<InteractiveSectionRow> rows = section.getRows();
+
+            if (rows == null || rows.isEmpty()) {
+                return new IllegalArgumentException("Each section must contain at least one row.");
+            }
+
+            if (rows.size() > 10) {
+                return new IllegalArgumentException("Each section can contain up to 10 rows maximum.");
+            }
+
+            for (InteractiveSectionRow row : rows) {
+                if (row.getId() == null || row.getId().trim().isEmpty()) {
+                    return new IllegalArgumentException("Each row must have a non-empty ID.");
+                }
+
+                if (row.getId().length() > 200) {
+                    return new IllegalArgumentException("Row ID cannot exceed 200 characters.");
+                }
+
+                if (row.getTitle() == null || row.getTitle().trim().isEmpty()) {
+                    return new IllegalArgumentException("Each row must have a title.");
+                }
+
+                if (row.getTitle().length() > 24) {
+                    return new IllegalArgumentException("Row title cannot exceed 24 characters.");
+                }
+
+                if (row.getDescription() != null && row.getDescription().length() > 72) {
+                    return new IllegalArgumentException("Row description cannot exceed 72 characters.");
+                }
+            }
+        }
+
+        return null; // ✅ Si todo es válido
     }
 
     /**

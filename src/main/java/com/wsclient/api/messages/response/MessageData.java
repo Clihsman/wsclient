@@ -9,7 +9,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * </p>
  *
  * @param id The unique identifier of the message.
- * @param message_status The message status.
+ * @param messageStatus The message status.
  */
 public record MessageData(String id, @JsonProperty("message_status") String messageStatus) {
 }

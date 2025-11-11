@@ -12,6 +12,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpStatus;
 import org.apache.http.ParseException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
@@ -25,6 +26,7 @@ import com.wsclient.api.messages.response.WhatsAppResponse;
 import com.wsclient.api.messages.response.template.TemplatesResponse;
 import com.wsclient.api.validators.ConfigValidator;
 import com.wsclient.core.exceptions.WhatsAppException;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -52,7 +54,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class WhatsAppServiceImpl implements WhatsAppService {
 
-    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
+            .setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
     private String whatsappApiUrl;
     private String phoneNumberId;
@@ -85,6 +88,7 @@ public class WhatsAppServiceImpl implements WhatsAppService {
      *                       account.
      * @param token          The authentication token for API access.
      */
+    @Override
     public void configureWhatsAppApi(String whatsappApiUrl, String phoneNumberId, String businessAccount,
             String token) {
         this.whatsappApiUrl = whatsappApiUrl;
@@ -107,6 +111,7 @@ public class WhatsAppServiceImpl implements WhatsAppService {
      * @throws InterruptedException If the operation is interrupted.
      * @throws WhatsAppException    If the API response indicates an error.
      */
+    @Override
     public WhatsAppResponse sendRequest(Map<String, Object> data)
             throws IOException, InterruptedException, WhatsAppException {
         HttpRequest httpRequest = createHttpRequest(data);
@@ -125,6 +130,7 @@ public class WhatsAppServiceImpl implements WhatsAppService {
      * @throws ParseException    if there is an error parsing the response body.
      * @return the response body as a string.
      */
+    @Override
     public String sendRequest(HttpPost httpPost) throws IOException, ParseException, WhatsAppException {
         try (CloseableHttpClient httpClient = HttpClientBuilder.create()
                 .build()) {
@@ -148,6 +154,55 @@ public class WhatsAppServiceImpl implements WhatsAppService {
     }
 
     /**
+     * Retrieves the list of available WhatsApp message templates.
+     *
+     * <p>
+     * This method contacts the WhatsApp Business API to fetch all registered
+     * message templates associated with the account. Templates can be used to send
+     * pre-approved messages to users, such as notifications, alerts, and updates.
+     * </p>
+     *
+     * @return A {@link CompletableFuture} that resolves to a
+     *         {@link TemplatesResponse}
+     *         containing the list of available templates.
+     */
+    @Override
+    public CompletableFuture<TemplatesResponse> getTamplates() {
+        return CompletableFuture.supplyAsync(() -> {
+            Objects.nonNull(businessAccount);
+
+            String url = String.format("%s/%s/message_templates?access_token=%s",
+                    whatsappApiUrl,
+                    businessAccount,
+                    token);
+
+            HttpGet httpGet = new HttpGet(url);
+            httpGet.setHeader("Accept", "application/json");
+
+            try (CloseableHttpClient client = HttpClientBuilder.create().build();
+                    CloseableHttpResponse response = client.execute(httpGet)) {
+
+                HttpEntity responseEntity = response.getEntity();
+                if (responseEntity == null) {
+                    throw new IOException("No response received from the WhatsApp API.");
+                }
+
+                throwIfErrorResponse(response);
+
+                String body = EntityUtils.toString(responseEntity);
+                EntityUtils.consume(responseEntity);
+
+                System.out.println(body);
+
+                return OBJECT_MAPPER.readValue(body, TemplatesResponse.class);
+
+            } catch (IOException | ParseException | WhatsAppException e) {
+                throw new CompletionException("Failed to fetch WhatsApp templates", e);
+            }
+        });
+    }
+
+    /**
      * Creates an HTTP request object with the given request body.
      * <p>
      * This method serializes the request body to JSON and constructs an
@@ -161,7 +216,7 @@ public class WhatsAppServiceImpl implements WhatsAppService {
      *                                 body.
      */
     private HttpRequest createHttpRequest(Map<String, Object> body) throws JsonProcessingException {
-        String bodyString = new ObjectMapper().writeValueAsString(body);
+        String bodyString = OBJECT_MAPPER.writeValueAsString(body);
 
         return HttpRequest.newBuilder()
                 .uri(URI.create(String.format("%s/%s/messages", whatsappApiUrl, phoneNumberId)))
@@ -217,7 +272,7 @@ public class WhatsAppServiceImpl implements WhatsAppService {
     private void throwIfErrorResponse(HttpResponse<String> response) throws WhatsAppException {
         int statusCode = response.statusCode();
 
-        if (statusCode != 200) {
+        if (statusCode != HttpStatus.SC_OK) {
             try {
                 WhatsAppErrorResponse whatsAppErrorResponse = OBJECT_MAPPER.readValue(response.body(),
                         WhatsAppErrorResponse.class);
@@ -260,7 +315,7 @@ public class WhatsAppServiceImpl implements WhatsAppService {
             throws WhatsAppException, ParseException, IOException {
         int statusCode = response.getStatusLine().getStatusCode();
 
-        if (statusCode != 200) {
+        if (statusCode != HttpStatus.SC_OK) {
             try {
                 final HttpEntity responseEntity = response.getEntity();
                 String body = EntityUtils.toString(responseEntity);
@@ -280,42 +335,6 @@ public class WhatsAppServiceImpl implements WhatsAppService {
                         statusCode, 0, null, e);
             }
         }
-    }
-
-    @Override
-    public CompletableFuture<TemplatesResponse> getTamplates() {
-        return CompletableFuture.supplyAsync(() -> {
-            Objects.nonNull(businessAccount);
-
-            String url = String.format("%s/%s/message_templates?access_token=%s",
-                    whatsappApiUrl,
-                    businessAccount,
-                    token);
-
-            HttpGet httpGet = new HttpGet(url);
-            httpGet.setHeader("Accept", "application/json");
-
-            try (CloseableHttpClient client = HttpClientBuilder.create().build();
-                    CloseableHttpResponse response = client.execute(httpGet)) {
-
-                HttpEntity responseEntity = response.getEntity();
-                if (responseEntity == null) {
-                    throw new IOException("No response received from the WhatsApp API.");
-                }
-
-                throwIfErrorResponse(response);
-
-                String body = EntityUtils.toString(responseEntity);
-                EntityUtils.consume(responseEntity);
-
-                System.out.println(body);
-
-                return OBJECT_MAPPER.readValue(body, TemplatesResponse.class);
-
-            } catch (IOException | ParseException | WhatsAppException e) {
-                throw new CompletionException("Failed to fetch WhatsApp templates", e);
-            }
-        });
     }
 
 }

@@ -11,6 +11,7 @@ import com.wsclient.api.messages.request.Template;
 import com.wsclient.api.messages.request.Text;
 import com.wsclient.api.messages.request.interactive.Interactive;
 import com.wsclient.api.messages.response.WhatsAppResponse;
+import com.wsclient.api.validators.ConfigValidator;
 
 /**
  * A client for sending messages via WhatsApp's API.
@@ -60,6 +61,7 @@ public class WhatsAppClientImpl implements WhatsAppClient {
      */
     @Override
     public void configureWhatsAppApi(String whatsappApiUrl, String phoneNumberId, String token) {
+        ConfigValidator.validateConfig(whatsappApiUrl, phoneNumberId, token);
         whatsAppService.configureWhatsAppApi(whatsappApiUrl, phoneNumberId, null, token);
     }
 

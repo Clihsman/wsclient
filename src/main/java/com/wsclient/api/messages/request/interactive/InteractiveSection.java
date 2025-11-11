@@ -1,5 +1,6 @@
 package com.wsclient.api.messages.request.interactive;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import lombok.AllArgsConstructor;
@@ -44,6 +45,7 @@ public class InteractiveSection {
      * length: 72
      * characters), but it is optional.
      */
-    private List<InteractiveSectionRow> rows;
+    @Builder.Default
+    private List<InteractiveSectionRow> rows = new ArrayList<>();
 
 }
