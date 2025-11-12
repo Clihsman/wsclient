@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import com.wsclient.api.messages.request.Media;
@@ -16,6 +17,7 @@ import com.wsclient.api.messages.request.interactive.InteractiveButton;
 import com.wsclient.api.messages.request.interactive.InteractiveButtonReply;
 import com.wsclient.api.messages.request.interactive.InteractiveSection;
 import com.wsclient.api.messages.request.interactive.InteractiveSectionRow;
+import com.wsclient.api.messages.response.WhatsAppResponse;
 import com.wsclient.api.messages.request.interactive.Interactive.InteractiveType;
 
 /**
@@ -254,7 +256,7 @@ public final class WhatsAppInputValidator {
                     String.format("Duplicate row IDs found: %s", String.join(", ", duplicates)));
         }
 
-        return null; // ✅ Todo correcto
+        return null;
     }
 
     /**
@@ -301,7 +303,7 @@ public final class WhatsAppInputValidator {
                     String.format("Duplicate button IDs found: %s", String.join(", ", duplicates)));
         }
 
-        return null; // ✅ All IDs are unique
+        return null;
     }
 
     /**
@@ -366,6 +368,50 @@ public final class WhatsAppInputValidator {
         return null;
     }
 
+    /**
+     * Validates a list of interactive sections used in WhatsApp interactive message
+     * templates.
+     * <p>
+     * This method performs a full validation of a list of
+     * {@link InteractiveSection} objects to ensure
+     * they comply with the structural and content constraints required by
+     * WhatsApp's messaging API.
+     * </p>
+     *
+     * <h3>Validation rules:</h3>
+     * <ul>
+     * <li>The list of sections must not be {@code null} or empty.</li>
+     * <li>A maximum of 10 sections is allowed.</li>
+     * <li>Section titles:
+     * <ul>
+     * <li>Must not be {@code null} or empty.</li>
+     * <li>Cannot exceed 24 characters.</li>
+     * </ul>
+     * </li>
+     * <li>Each section must contain between 1 and 10 rows.</li>
+     * <li>Rows:
+     * <ul>
+     * <li>Each row must have a non-empty {@code id} (max 200 characters).</li>
+     * <li>Each row must have a non-empty {@code title} (max 24 characters).</li>
+     * <li>{@code description} is optional but cannot exceed 72 characters.</li>
+     * </ul>
+     * </li>
+     * <li>No duplicate row IDs are allowed across sections.</li>
+     * </ul>
+     *
+     * @param interactiveSections the list of {@link InteractiveSection} objects to
+     *                            validate
+     * @return an {@link IllegalArgumentException} describing the first validation
+     *         error found,
+     *         or {@code null} if the list is valid.
+     *
+     * @throws IllegalArgumentException if any rule above is violated
+     *                                  (the method does not throw directly; it
+     *                                  returns the exception instance instead).
+     *
+     * @see InteractiveSection
+     * @see InteractiveSectionRow
+     */
     private static IllegalArgumentException validateSectionList(List<InteractiveSection> interactiveSections) {
 
         if (interactiveSections == null || interactiveSections.isEmpty()) {
@@ -424,22 +470,40 @@ public final class WhatsAppInputValidator {
             }
         }
 
-        return null; // ✅ Si todo es válido
+        return null;
     }
 
     /**
-     * /**
-     * Validates the input parameters for sending a WhatsApp image message.
+     * Sends a WhatsApp video message asynchronously to a specified recipient.
+     * <p>
+     * This method sends a video message through the WhatsApp Cloud API using the
+     * provided recipient number and {@link Media} object. The video can be
+     * referenced either by its uploaded {@code id} or a publicly accessible
+     * {@code link}. Optionally, a caption can be included with the video.
+     * </p>
+     *
+     * <p>
+     * <strong>Notes:</strong>
+     * </p>
+     * <ul>
+     * <li>The recipient's phone number must be in international format and contain
+     * only digits (e.g., "573001112233").</li>
+     * <li>The {@link Media} object must include either a valid {@code id} or
+     * {@code link}.</li>
+     * <li>If a caption is included, its length must not exceed 1024
+     * characters.</li>
+     * </ul>
      *
      * @param to    The recipient's phone number in international format.
-     *              It must contain only digits (e.g., "573001112233").
-     * @param media The {@link Media} object containing the image information.
-     *              It must include either a valid {@code id} or a valid
-     *              {@code link}.
-     * @return An {@link IllegalArgumentException} if any validation fails;
-     *         otherwise, returns {@code null}.
+     * @param video The video media object containing the video URL or ID, caption,
+     *              and optional metadata.
+     * @return A {@link CompletableFuture} that resolves to a
+     *         {@link WhatsAppResponse}
+     *         containing the API response.
+     * @throws IllegalArgumentException if validation of the recipient or video
+     *                                  media fails.
      */
-    public static IllegalArgumentException validateImageInput(String to, Media media) {
+    public static IllegalArgumentException validateMediaInput(String to, Media media) {
 
         if (Objects.isNull(to)) {
             return new IllegalArgumentException("Recipient number cannot be null.");
@@ -467,10 +531,105 @@ public final class WhatsAppInputValidator {
             return new IllegalArgumentException("Caption exceeds maximum length of 1024 characters.");
         }
 
-        if (media.getFilename() != null && media.getFilename().length() > 255) {
-            return new IllegalArgumentException("Filename exceeds maximum length of 255 characters.");
+        return null;
+    }
+
+    /**
+     * Validates the input parameters for sending a WhatsApp image message.
+     *
+     * <p>
+     * This method ensures that both the recipient and the image data
+     * comply with WhatsApp API constraints. The recipient must be a valid
+     * numeric string, and the {@link Media} object must include either a
+     * valid {@code id} or a valid {@code link}. Captions are optional but
+     * cannot exceed 1024 characters.
+     * </p>
+     *
+     * @param to    The recipient's phone number in international format.
+     *              It must contain only digits (e.g., "573001112233").
+     * @param media The {@link Media} object containing the image information.
+     *              It must include either a valid {@code id} or a valid
+     *              {@code link}.
+     * @return An {@link IllegalArgumentException} if any validation fails;
+     *         otherwise, returns {@code null}.
+     */
+    public static IllegalArgumentException validateImageInput(String to, Media image) {
+
+        IllegalArgumentException exceptionValidateMedia = validateMediaInput(to, image);
+
+        if (exceptionValidateMedia != null)
+            return exceptionValidateMedia;
+
+        if (image.getFilename() != null && !image.getFilename().isBlank()) {
+            return new IllegalArgumentException("Filename is not allowed for image messages.");
         }
 
         return null;
     }
+
+    /**
+     * Validates the input parameters for sending a WhatsApp video message.
+     *
+     * <p>
+     * This method ensures that both the recipient and the video data comply with
+     * WhatsApp API constraints. The recipient must be a valid numeric string,
+     * and the {@link Media} object must include either a valid {@code id} or a
+     * valid {@code link}. Captions are optional but cannot exceed 1024 characters.
+     * </p>
+     *
+     * <p>
+     * <strong>Note:</strong> The {@code filename} field is not allowed for
+     * video messages, as the WhatsApp Cloud API ignores or rejects it.
+     * </p>
+     *
+     * @param to    The recipient's phone number in international format.
+     *              It must contain only digits (e.g., "573001112233").
+     * @param video The {@link Media} object containing the video information.
+     *              It must include either a valid {@code id} or a valid
+     *              {@code link}.
+     * @return An {@link IllegalArgumentException} if any validation fails;
+     *         otherwise, returns {@code null}.
+     */
+    public static IllegalArgumentException validateVideoInput(String to, Media video) {
+
+        IllegalArgumentException exceptionValidateMedia = validateMediaInput(to, video);
+
+        if (exceptionValidateMedia != null)
+            return exceptionValidateMedia;
+
+        if (video.getFilename() != null && !video.getFilename().isBlank()) {
+            return new IllegalArgumentException("Filename is not allowed for video messages.");
+        }
+
+        return null;
+    }
+
+    /**
+     * Validates the input parameters for sending a WhatsApp document message.
+     *
+     * @param to    The recipient's phone number in international format.
+     *              It must contain only digits (e.g., "573001112233").
+     * @param media The {@link Media} object containing the document information.
+     *              It must include either a valid {@code id} or {@code link}, and
+     *              must always include a valid {@code filename}.
+     * @return An {@link IllegalArgumentException} if any validation fails;
+     *         otherwise, returns {@code null}.
+     */
+    public static IllegalArgumentException validateDocumentInput(String to, Media document) {
+        IllegalArgumentException exceptionValidateMedia = validateMediaInput(to, document);
+
+        if (exceptionValidateMedia != null)
+            return exceptionValidateMedia;
+
+        if (document.getFilename() == null || document.getFilename().isBlank()) {
+            return new IllegalArgumentException("Filename is required for document messages.");
+        }
+
+        if (document.getFilename().length() > 240) {
+            return new IllegalArgumentException("Filename exceeds maximum length of 240 characters.");
+        }
+
+        return null;
+    }
+
 }
