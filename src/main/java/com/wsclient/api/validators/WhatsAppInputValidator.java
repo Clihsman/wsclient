@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import com.wsclient.api.messages.request.Media;
@@ -17,7 +16,6 @@ import com.wsclient.api.messages.request.interactive.InteractiveButton;
 import com.wsclient.api.messages.request.interactive.InteractiveButtonReply;
 import com.wsclient.api.messages.request.interactive.InteractiveSection;
 import com.wsclient.api.messages.request.interactive.InteractiveSectionRow;
-import com.wsclient.api.messages.response.WhatsAppResponse;
 import com.wsclient.api.messages.request.interactive.Interactive.InteractiveType;
 
 /**
@@ -474,34 +472,35 @@ public final class WhatsAppInputValidator {
     }
 
     /**
-     * Sends a WhatsApp video message asynchronously to a specified recipient.
+     * Validates the input parameters for sending any WhatsApp media message.
      * <p>
-     * This method sends a video message through the WhatsApp Cloud API using the
-     * provided recipient number and {@link Media} object. The video can be
-     * referenced either by its uploaded {@code id} or a publicly accessible
-     * {@code link}. Optionally, a caption can be included with the video.
+     * This method performs generic validation applicable to all media types
+     * (e.g., images, videos, documents). It ensures that the recipient number and
+     * the provided {@link Media} object comply with WhatsApp API constraints.
      * </p>
      *
      * <p>
-     * <strong>Notes:</strong>
+     * <strong>Validation Rules:</strong>
      * </p>
      * <ul>
-     * <li>The recipient's phone number must be in international format and contain
-     * only digits (e.g., "573001112233").</li>
-     * <li>The {@link Media} object must include either a valid {@code id} or
-     * {@code link}.</li>
-     * <li>If a caption is included, its length must not exceed 1024
+     * <li>The recipient's phone number (<code>to</code>) cannot be null and must
+     * contain only digits (e.g., "573001112233").</li>
+     * <li>The {@link Media} object cannot be null.</li>
+     * <li>The {@link Media} object must include either a valid <code>id</code>
+     * (for previously uploaded media) or a publicly accessible
+     * <code>link</code>.</li>
+     * <li>If a <code>link</code> is provided, it must be a valid HTTP or HTTPS
+     * URL.</li>
+     * <li>If a <code>caption</code> is present, it must not exceed 1024
      * characters.</li>
      * </ul>
      *
      * @param to    The recipient's phone number in international format.
-     * @param video The video media object containing the video URL or ID, caption,
-     *              and optional metadata.
-     * @return A {@link CompletableFuture} that resolves to a
-     *         {@link WhatsAppResponse}
-     *         containing the API response.
-     * @throws IllegalArgumentException if validation of the recipient or video
-     *                                  media fails.
+     * @param media The {@link Media} object containing the media metadata (ID,
+     *              link,
+     *              caption, etc.).
+     * @return An {@link IllegalArgumentException} if any validation fails;
+     *         otherwise, returns {@code null}.
      */
     public static IllegalArgumentException validateMediaInput(String to, Media media) {
 
@@ -547,7 +546,7 @@ public final class WhatsAppInputValidator {
      *
      * @param to    The recipient's phone number in international format.
      *              It must contain only digits (e.g., "573001112233").
-     * @param media The {@link Media} object containing the image information.
+     * @param image The {@link Media} object containing the image information.
      *              It must include either a valid {@code id} or a valid
      *              {@code link}.
      * @return An {@link IllegalArgumentException} if any validation fails;
@@ -609,7 +608,7 @@ public final class WhatsAppInputValidator {
      *
      * @param to    The recipient's phone number in international format.
      *              It must contain only digits (e.g., "573001112233").
-     * @param media The {@link Media} object containing the document information.
+     * @param document The {@link Media} object containing the document information.
      *              It must include either a valid {@code id} or {@code link}, and
      *              must always include a valid {@code filename}.
      * @return An {@link IllegalArgumentException} if any validation fails;
