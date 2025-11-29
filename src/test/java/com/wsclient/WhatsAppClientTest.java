@@ -646,7 +646,7 @@ public class WhatsAppClientTest {
                 Map<String, Object> expectedData = Map.of(
                                 "messaging_product", "whatsapp",
                                 "to", validTo,
-                                "type", "document",
+                                "type", "video",
                                 "video", video);
 
                 when(whatsAppService.sendRequest(expectedData)).thenReturn(expectedResponse);
