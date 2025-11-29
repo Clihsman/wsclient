@@ -220,7 +220,7 @@ public class WhatsAppClientImpl implements WhatsAppClient {
         Map<String, Object> data = Map.of(
                 "messaging_product", "whatsapp",
                 "to", to,
-                "type", "document",
+                "type", "video",
                 "video", video);
 
         return CompletableFuture.supplyAsync(() -> {
