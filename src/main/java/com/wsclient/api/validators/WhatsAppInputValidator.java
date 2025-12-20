@@ -604,13 +604,51 @@ public final class WhatsAppInputValidator {
     }
 
     /**
-     * Validates the input parameters for sending a WhatsApp document message.
+     * Validates the input parameters for sending a WhatsApp audio message.
+     *
+     * <p>
+     * This method ensures that both the recipient and the audio data comply with
+     * WhatsApp Cloud API constraints. The recipient must be a valid numeric string,
+     * and the {@link Media} object must include either a valid {@code id} or a
+     * valid {@code link}.
+     * </p>
+     *
+     * <p>
+     * <strong>Note:</strong> The {@code filename} field is not allowed for
+     * audio messages, as the WhatsApp Cloud API ignores or rejects it.
+     * </p>
      *
      * @param to    The recipient's phone number in international format.
      *              It must contain only digits (e.g., "573001112233").
+     * @param audio The {@link Media} object containing the audio information.
+     *              It must include either a valid {@code id} or a valid
+     *              {@code link}.
+     * @return An {@link IllegalArgumentException} if any validation fails;
+     *         otherwise, returns {@code null}.
+     */
+    public static IllegalArgumentException validateAudioInput(String to, Media audio) {
+
+        IllegalArgumentException exceptionValidateMedia = validateMediaInput(to, audio);
+
+        if (exceptionValidateMedia != null)
+            return exceptionValidateMedia;
+
+        if (audio.getFilename() != null && !audio.getFilename().isBlank()) {
+            return new IllegalArgumentException("Filename is not allowed for video messages.");
+        }
+
+        return null;
+    }
+
+    /**
+     * Validates the input parameters for sending a WhatsApp document message.
+     *
+     * @param to       The recipient's phone number in international format.
+     *                 It must contain only digits (e.g., "573001112233").
      * @param document The {@link Media} object containing the document information.
-     *              It must include either a valid {@code id} or {@code link}, and
-     *              must always include a valid {@code filename}.
+     *                 It must include either a valid {@code id} or {@code link},
+     *                 and
+     *                 must always include a valid {@code filename}.
      * @return An {@link IllegalArgumentException} if any validation fails;
      *         otherwise, returns {@code null}.
      */

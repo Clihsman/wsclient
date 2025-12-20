@@ -656,4 +656,111 @@ public class WhatsAppClientTest {
                 assertEquals(expectedResponse, actualResponse);
                 verify(whatsAppService, times(1)).sendRequest(expectedData);
         }
+
+        @Test
+        void sendAudioAsync_ShouldFail_WhenRecipientIsNull() {
+                Media video = Media.builder().link("https://example.com/audio.mp3").build();
+
+                CompletionException ex = assertThrows(CompletionException.class,
+                                () -> whatsAppClient.sendAudioAsync(null, video).join());
+
+                assertTrue(ex.getCause() instanceof IllegalArgumentException);
+                assertEquals("Recipient number cannot be null.", ex.getCause().getMessage());
+        }
+
+        @Test
+        void sendAudioAsync_ShouldFail_WhenRecipientIsInvalid() {
+                Media video = Media.builder().link("https://example.com/audio.mp3").build();
+
+                CompletionException ex = assertThrows(CompletionException.class,
+                                () -> whatsAppClient.sendAudioAsync("30011A223", video).join());
+
+                assertTrue(ex.getCause() instanceof IllegalArgumentException);
+                assertEquals("Invalid recipient number. The 'to' field must contain only digits.",
+                                ex.getCause().getMessage());
+        }
+
+        @Test
+        void sendAudioAsync_ShouldFail_WhenMediaIsNull() {
+                CompletionException ex = assertThrows(CompletionException.class,
+                                () -> whatsAppClient.sendAudioAsync("573001112233", null).join());
+
+                assertTrue(ex.getCause() instanceof IllegalArgumentException);
+                assertEquals("Media object cannot be null.", ex.getCause().getMessage());
+        }
+
+        @Test
+        void sendAudioAsync_ShouldFail_WhenNoIdOrLinkProvided() {
+                Media video = Media.builder().build();
+
+                CompletionException ex = assertThrows(CompletionException.class,
+                                () -> whatsAppClient.sendAudioAsync("573001112233", video).join());
+
+                assertTrue(ex.getCause() instanceof IllegalArgumentException);
+                assertEquals("Media must have either an 'id' or a 'link' defined.", ex.getCause().getMessage());
+        }
+
+        @Test
+        void sendAudioAsync_ShouldFail_WhenLinkIsInvalid() {
+                Media video = Media.builder().link("ftp://example.com/audio.mp3").build();
+
+                CompletionException ex = assertThrows(CompletionException.class,
+                                () -> whatsAppClient.sendAudioAsync("573001112233", video).join());
+
+                assertTrue(ex.getCause() instanceof IllegalArgumentException);
+                assertEquals("Invalid media link. Only HTTP/HTTPS URLs are allowed.", ex.getCause().getMessage());
+        }
+
+        @Test
+        void sendAudioAsync_ShouldFail_WhenCaptionTooLong() {
+                Media video = Media.builder()
+                                .link("https://example.com/audio.mp3")
+                                .caption("A".repeat(1025))
+                                .build();
+
+                CompletionException ex = assertThrows(CompletionException.class,
+                                () -> whatsAppClient.sendAudioAsync("573001112233", video).join());
+
+                assertTrue(ex.getCause() instanceof IllegalArgumentException);
+                assertEquals("Caption exceeds maximum length of 1024 characters.", ex.getCause().getMessage());
+        }
+
+        @Test
+        void sendAudioAsync_ShouldFail_WhenFilenameProvided() {
+                Media video = Media.builder()
+                                .link("https://example.com/audio.mp3")
+                                .filename("video.mp4")
+                                .build();
+
+                CompletionException ex = assertThrows(CompletionException.class,
+                                () -> whatsAppClient.sendAudioAsync("573001112233", video).join());
+
+                assertTrue(ex.getCause() instanceof IllegalArgumentException);
+                assertEquals("Filename is not allowed for video messages.", ex.getCause().getMessage());
+        }
+
+        @Test
+        void sendAudioAsync_ShouldReturnResponse_WhenRequestIsSuccessful()
+                        throws Exception {
+                final String validTo = "573001112233";
+                final Media audio = Media.builder()
+                                .link("https://example.com/audio.mp3")
+                                .caption("Sample audio caption")
+                                .build();
+
+                final WhatsAppResponse expectedResponse = new WhatsAppResponse(validTo, null, null);
+
+                Map<String, Object> expectedData = Map.of(
+                                "messaging_product", "whatsapp",
+                                "to", validTo,
+                                "type", "audio",
+                                "audio", audio);
+
+                when(whatsAppService.sendRequest(expectedData)).thenReturn(expectedResponse);
+
+                WhatsAppResponse actualResponse = whatsAppClient.sendAudioAsync(validTo, audio).join();
+
+                assertEquals(expectedResponse, actualResponse);
+                verify(whatsAppService, times(1)).sendRequest(expectedData);
+        }
 }

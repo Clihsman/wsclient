@@ -232,6 +232,29 @@ public class WhatsAppClientImpl implements WhatsAppClient {
         });
     }
 
+    @Override
+    public CompletableFuture<WhatsAppResponse> sendAudioAsync(String to, Media audio) {
+        final IllegalArgumentException exception = validateAudioInput(to, audio);
+
+        if (exception != null) {
+            return CompletableFuture.failedFuture(exception);
+        }
+
+        Map<String, Object> data = Map.of(
+                "messaging_product", "whatsapp",
+                "to", to,
+                "type", "audio",
+                "audio", audio);
+
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                return whatsAppService.sendRequest(data);
+            } catch (Exception e) {
+                throw new CompletionException(e);
+            }
+        });
+    }
+
     /**
      * Sends a WhatsApp document message to a specified recipient.
      *

@@ -41,6 +41,8 @@ public class MetaWebhookServiceImpl implements MetaWebhookService {
                 String url = graphUrl + "/" + appId + "/subscriptions";
                 HttpPost post = new HttpPost(url);
 
+
+                
                 // Headers
                 post.setHeader("Authorization", "Bearer " + accessToken);
                 post.setHeader("Content-Type", "application/json");
@@ -64,7 +66,7 @@ public class MetaWebhookServiceImpl implements MetaWebhookService {
                 }
 
             } catch (Exception e) {
-                throw new RuntimeException("Error registrando webhook: " + e.getMessage(), e);
+                throw new RuntimeException("Error al registrar el webhook: " + e.getMessage(), e);
             }
         });
     }

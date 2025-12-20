@@ -98,6 +98,36 @@ public interface WhatsAppClient {
         public CompletableFuture<WhatsAppResponse> sendVideoAsync(String to, Media video);
 
         /**
+         * Sends a WhatsApp audio message asynchronously to a specified recipient.
+         * <p>
+         * This method sends an audio message through the WhatsApp Cloud API using the
+         * provided recipient number and {@link Media} object. The audio can be
+         * referenced either by its uploaded {@code id} or a publicly accessible
+         * {@code link}.
+         * </p>
+         *
+         * <p>
+         * <strong>Notes:</strong>
+         * </p>
+         * <ul>
+         * <li>The recipient's phone number must be in international format and contain
+         * only digits (e.g., "573001112233").</li>
+         * <li>The {@link Media} object must include either a valid {@code id} or
+         * {@code link}.</li>
+         * <li>Audio messages do not support captions.</li>
+         * </ul>
+         *
+         * @param to    The recipient's phone number in international format.
+         * @param audio The audio media object containing the audio URL or ID and
+         *              optional metadata.
+         * @return A {@link CompletableFuture} that resolves to a
+         *         {@link WhatsAppResponse} containing the API response.
+         * @throws IllegalArgumentException if validation of the recipient or audio
+         *                                  media fails.
+         */
+        public CompletableFuture<WhatsAppResponse> sendAudioAsync(String to, Media audio);
+
+        /**
          * Sends a WhatsApp document message to a specified recipient.
          *
          * <p>
