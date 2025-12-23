@@ -168,6 +168,22 @@ public interface WhatsAppClient {
         public CompletableFuture<WhatsAppResponse> sendTemplate(String to, Template template);
 
         /**
+         * Sends a typing indicator for a WhatsApp message.
+         * <p>
+         * This method sends a request to the WhatsApp API to indicate that the system
+         * is typing a response to a specific message. This improves the user experience
+         * by informing the recipient that a reply is being prepared.
+         * </p>
+         *
+         * @param messageId The unique identifier of the message related to the typing
+         *                  indicator.
+         * @return A {@link CompletableFuture} containing a {@link WhatsAppResponse}
+         *         with the API's response.
+         *         The future completes when the request is processed.
+         */
+        public CompletableFuture<WhatsAppResponse> typingIndicator(String messageId);
+
+        /**
          * Marks a WhatsApp message as read.
          * <p>
          * This method sends a request to the WhatsApp API to update the status of a
