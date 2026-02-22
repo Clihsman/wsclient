@@ -6,6 +6,16 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
+import org.apache.http.client.methods.HttpGet;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.wsclient.api.business.request.BusinessProfile;
+import com.wsclient.api.business.response.BusinessProfileResponse;
 import com.wsclient.api.messages.request.Media;
 import com.wsclient.api.messages.request.Template;
 import com.wsclient.api.messages.request.Text;
@@ -69,7 +79,7 @@ public class WhatsAppClientImpl implements WhatsAppClient {
 
         return CompletableFuture.supplyAsync(() -> {
             try {
-                return whatsAppService.sendRequest(data);
+                return whatsAppService.sendRequest(data, "messages");
             } catch (Exception e) {
                 throw new CompletionException(e);
             }
@@ -92,7 +102,7 @@ public class WhatsAppClientImpl implements WhatsAppClient {
 
         return CompletableFuture.supplyAsync(() -> {
             try {
-                return whatsAppService.sendRequest(data);
+                return whatsAppService.sendRequest(data, "messages");
             } catch (Exception e) {
                 throw new CompletionException(e);
             }
@@ -110,7 +120,7 @@ public class WhatsAppClientImpl implements WhatsAppClient {
 
         return CompletableFuture.supplyAsync(() -> {
             try {
-                return whatsAppService.sendRequest(data);
+                return whatsAppService.sendRequest(data, "messages");
             } catch (Exception e) {
                 throw new CompletionException(e);
             }
@@ -132,7 +142,7 @@ public class WhatsAppClientImpl implements WhatsAppClient {
 
         return CompletableFuture.supplyAsync(() -> {
             try {
-                return whatsAppService.sendRequest(data);
+                return whatsAppService.sendRequest(data, "messages");
             } catch (Exception e) {
                 throw new CompletionException(e);
             }
@@ -155,7 +165,7 @@ public class WhatsAppClientImpl implements WhatsAppClient {
 
         return CompletableFuture.supplyAsync(() -> {
             try {
-                return whatsAppService.sendRequest(data);
+                return whatsAppService.sendRequest(data, "messages");
             } catch (Exception e) {
                 throw new CompletionException(e);
             }
@@ -178,7 +188,7 @@ public class WhatsAppClientImpl implements WhatsAppClient {
 
         return CompletableFuture.supplyAsync(() -> {
             try {
-                return whatsAppService.sendRequest(data);
+                return whatsAppService.sendRequest(data, "messages");
             } catch (Exception e) {
                 throw new CompletionException(e);
             }
@@ -201,7 +211,7 @@ public class WhatsAppClientImpl implements WhatsAppClient {
 
         return CompletableFuture.supplyAsync(() -> {
             try {
-                return whatsAppService.sendRequest(data);
+                return whatsAppService.sendRequest(data, "messages");
             } catch (Exception e) {
                 throw new CompletionException(e);
             }
@@ -218,7 +228,7 @@ public class WhatsAppClientImpl implements WhatsAppClient {
 
         return CompletableFuture.supplyAsync(() -> {
             try {
-                return whatsAppService.sendRequest(data);
+                return whatsAppService.sendRequest(data, "messages");
             } catch (Exception e) {
                 throw new CompletionException(e);
             }
@@ -234,7 +244,84 @@ public class WhatsAppClientImpl implements WhatsAppClient {
 
         return CompletableFuture.supplyAsync(() -> {
             try {
-                return whatsAppService.sendRequest(data);
+                return whatsAppService.sendRequest(data, "messages");
+            } catch (Exception e) {
+                throw new CompletionException(e);
+            }
+        });
+    }
+
+    @Override
+    public CompletableFuture<BusinessProfileResponse> getBusinessProfile() {
+
+        final HttpGet httpGet = new HttpGet(
+                String.format(
+                        "%s/whatsapp_business_profile?fields=%s",
+                        whatsAppService.getWhatsappApiUrl(),
+                        "about,address,description,email,profile_picture_url,websites,vertical"));
+
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                final String json = whatsAppService.sendRequest(httpGet);
+
+                ObjectMapper mapper = new ObjectMapper()
+                        .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+                        .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+                        .configure(
+                                DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES,
+                                false);
+
+                JsonNode root = mapper.readTree(json);
+
+                JsonNode dataNode = root.path("data");
+                if (!dataNode.isArray() || dataNode.isEmpty()) {
+                    throw new IllegalStateException("WhatsApp API returned empty data array");
+                }
+
+                JsonNode businessProfileNode = dataNode.get(0).path("business_profile");
+
+                if (!businessProfileNode.isObject()) {
+                    throw new IllegalStateException("Missing business_profile object in response");
+                }
+
+                return mapper.treeToValue(
+                        businessProfileNode,
+                        BusinessProfileResponse.class);
+
+            } catch (Exception e) {
+                throw new CompletionException("Failed to get business profile", e);
+            }
+        });
+    }
+
+    @Override
+    public CompletableFuture<WhatsAppResponse> updateBusinessProfile(BusinessProfile profile) {
+
+        if (profile == null) {
+            throw new IllegalArgumentException("BusinessProfile must not be null");
+        }
+
+        ObjectMapper mapper = new ObjectMapper()
+                .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
+                .setSerializationInclusion(JsonInclude.Include.NON_NULL);
+
+        // business_profile object
+        ObjectNode businessProfileNode = mapper.valueToTree(profile);
+        businessProfileNode.put("messaging_product", "whatsapp");
+        businessProfileNode.put("id", whatsAppService.getPhoneNumberId());
+
+        // data[0]
+        ObjectNode dataItem = mapper.createObjectNode();
+        dataItem.set("business_profile", businessProfileNode);
+        dataItem.put("id", whatsAppService.getPhoneNumberId());
+
+        // root
+        ObjectNode root = mapper.createObjectNode();
+        root.set("data", mapper.createArrayNode().add(dataItem));
+
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                return whatsAppService.sendRequest(root, "whatsapp_business_profile");
             } catch (Exception e) {
                 throw new CompletionException(e);
             }

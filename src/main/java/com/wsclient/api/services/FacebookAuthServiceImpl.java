@@ -14,12 +14,14 @@ import org.apache.http.util.EntityUtils;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.wsclient.api.webhook.FBAccessToken;
 
 public class FacebookAuthServiceImpl implements FacebookAuthService {
 
     private static final String GRAPH_API_URL = "https://graph.facebook.com/oauth/access_token";
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
+            .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
             .setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
     @Override

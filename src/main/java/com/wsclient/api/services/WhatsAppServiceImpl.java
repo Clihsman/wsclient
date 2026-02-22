@@ -30,6 +30,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  * Implementation of the {@link WhatsAppService} interface.
@@ -61,7 +62,6 @@ public class WhatsAppServiceImpl implements WhatsAppService {
     private String phoneNumberId;
     private String businessAccount;
     private String token;
-
     private final HttpClient httpClient;
 
     /**
@@ -112,9 +112,17 @@ public class WhatsAppServiceImpl implements WhatsAppService {
      * @throws WhatsAppException    If the API response indicates an error.
      */
     @Override
-    public WhatsAppResponse sendRequest(Map<String, Object> data)
+    public WhatsAppResponse sendRequest(Map<String, Object> data, String path)
             throws IOException, InterruptedException, WhatsAppException {
-        HttpRequest httpRequest = createHttpRequest(data);
+        HttpRequest httpRequest = createHttpRequest(data, path);
+        HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
+        return getWhatsAppResponse(response);
+    }
+
+    @Override
+    public WhatsAppResponse sendRequest(ObjectNode data, String path)
+            throws IOException, InterruptedException, WhatsAppException {
+        HttpRequest httpRequest = createHttpRequest(data, path);
         HttpResponse<String> response = httpClient.send(httpRequest, HttpResponse.BodyHandlers.ofString());
         return getWhatsAppResponse(response);
     }
@@ -136,6 +144,29 @@ public class WhatsAppServiceImpl implements WhatsAppService {
                 .build()) {
 
             try (CloseableHttpResponse response = httpClient.execute(httpPost)) {
+
+                HttpEntity responseEntity = response.getEntity();
+
+                if (responseEntity == null) {
+                    throw new IOException("No response received from the server.");
+                }
+
+                throwIfErrorResponse(response);
+
+                String body = EntityUtils.toString(responseEntity);
+                EntityUtils.consume(responseEntity);
+
+                return body;
+            }
+        }
+    }
+
+    @Override
+    public String sendRequest(HttpGet HttpGet) throws IOException, WhatsAppException {
+        try (CloseableHttpClient httpClient = HttpClientBuilder.create()
+                .build()) {
+
+            try (CloseableHttpResponse response = httpClient.execute(HttpGet)) {
 
                 HttpEntity responseEntity = response.getEntity();
 
@@ -215,11 +246,11 @@ public class WhatsAppServiceImpl implements WhatsAppService {
      * @throws JsonProcessingException If there is an error serializing the request
      *                                 body.
      */
-    private HttpRequest createHttpRequest(Map<String, Object> body) throws JsonProcessingException {
+    private HttpRequest createHttpRequest(Object body, String path) throws JsonProcessingException {
         String bodyString = OBJECT_MAPPER.writeValueAsString(body);
 
         return HttpRequest.newBuilder()
-                .uri(URI.create(String.format("%s/%s/messages", whatsappApiUrl, phoneNumberId)))
+                .uri(URI.create(String.format("%s/%s/%s", whatsappApiUrl, phoneNumberId, path)))
                 .header("Content-Type", "application/json")
                 .header("Authorization", String.format("Bearer %s", token))
                 .POST(HttpRequest.BodyPublishers.ofString(bodyString))
@@ -335,6 +366,21 @@ public class WhatsAppServiceImpl implements WhatsAppService {
                         statusCode, 0, null, e);
             }
         }
+    }
+
+    @Override
+    public String getPhoneNumberId() {
+        return phoneNumberId;
+    }
+
+    @Override
+    public String getBusinessAccount() {
+        return businessAccount;
+    }
+
+    @Override
+    public String getWhatsappApiUrl() {
+        return whatsappApiUrl;
     }
 
 }

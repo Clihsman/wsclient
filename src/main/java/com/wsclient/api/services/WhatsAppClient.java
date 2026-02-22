@@ -2,6 +2,8 @@ package com.wsclient.api.services;
 
 import java.util.concurrent.CompletableFuture;
 
+import com.wsclient.api.business.request.BusinessProfile;
+import com.wsclient.api.business.response.BusinessProfileResponse;
 import com.wsclient.api.messages.request.Media;
 import com.wsclient.api.messages.request.Template;
 import com.wsclient.api.messages.request.Text;
@@ -199,4 +201,49 @@ public interface WhatsAppClient {
          *         The future completes when the request is processed.
          */
         public CompletableFuture<WhatsAppResponse> markMessageAsRead(String messageId);
+
+        /**
+         * Retrieves the WhatsApp Business Profile associated with the configured
+         * phone number.
+         * <p>
+         * This method fetches the current business profile information configured
+         * for the WhatsApp phone number, such as description, contact details,
+         * profile picture URL, websites, and business vertical.
+         * </p>
+         *
+         * <p>
+         * The Business Profile does not have its own identifier; it is directly
+         * associated with the phone number ID configured in the client.
+         * </p>
+         *
+         * @return A {@link CompletableFuture} that completes with a
+         *         {@link BusinessProfileResponse} containing the business profile data
+         *         retrieved from the WhatsApp Cloud API.
+         */
+        public CompletableFuture<BusinessProfileResponse> getBusinessProfile();
+
+        /**
+         * Updates the WhatsApp Business Profile associated with the configured
+         * phone number.
+         * <p>
+         * This method updates one or more fields of the business profile, such as
+         * description, email, websites, address, or business category (vertical).
+         * Only the fields provided in the {@link BusinessProfile} object will be
+         * updated.
+         * </p>
+         *
+         * <p>
+         * The update is performed using the WhatsApp Cloud API and applies directly
+         * to the business profile linked to the phone number.
+         * </p>
+         *
+         * @param profile
+         *                A {@link BusinessProfile} object containing the fields to
+         *                update.
+         *
+         * @return A {@link CompletableFuture} that completes with a
+         *         {@link WhatsAppResponse} containing the API response once the update
+         *         request has been processed.
+         */
+        public CompletableFuture<WhatsAppResponse> updateBusinessProfile(BusinessProfile profile);
 }

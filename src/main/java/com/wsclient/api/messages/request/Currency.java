@@ -23,7 +23,7 @@ public class Currency {
      * The default text if localization fails.
      * </p>
      */
-    @JsonProperty("fallback_value")
+
     private String fallbackValue;
     /**
      * <strong>Required.</strong>

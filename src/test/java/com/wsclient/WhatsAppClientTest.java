@@ -109,13 +109,13 @@ public class WhatsAppClientTest {
                                 "to", validPhoneNumber,
                                 "text", exampleText);
 
-                when(whatsAppService.sendRequest(requestData)).thenReturn(expectedResponse);
+                when(whatsAppService.sendRequest(requestData, "messages")).thenReturn(expectedResponse);
 
                 final WhatsAppResponse actualResponse = whatsAppClient.sendTextAsync(validPhoneNumber, exampleText)
                                 .join();
 
                 assertEquals(expectedResponse, actualResponse);
-                verify(whatsAppService, times(1)).sendRequest(requestData);
+                verify(whatsAppService, times(1)).sendRequest(requestData, "messages");
         }
 
         // ===========================
@@ -191,13 +191,13 @@ public class WhatsAppClientTest {
                                 "type", "interactive",
                                 "interactive", exampleInteractive);
 
-                when(whatsAppService.sendRequest(requestData)).thenReturn(expectedResponse);
+                when(whatsAppService.sendRequest(requestData, "messages")).thenReturn(expectedResponse);
 
                 final WhatsAppResponse actualResponse = whatsAppClient
                                 .sendInteractiveAsync(validPhoneNumber, exampleInteractive).join();
 
                 assertEquals(expectedResponse, actualResponse);
-                verify(whatsAppService, times(1)).sendRequest(requestData);
+                verify(whatsAppService, times(1)).sendRequest(requestData, "messages");
         }
 
         // ===========================
@@ -280,13 +280,13 @@ public class WhatsAppClientTest {
                                 "type", "interactive",
                                 "interactive", exampleInteractive);
 
-                when(whatsAppService.sendRequest(requestData)).thenReturn(expectedResponse);
+                when(whatsAppService.sendRequest(requestData, "messages")).thenReturn(expectedResponse);
 
                 final WhatsAppResponse actualResponse = whatsAppClient
                                 .sendInteractiveAsync(validPhoneNumber, exampleInteractive).join();
 
                 assertEquals(expectedResponse, actualResponse);
-                verify(whatsAppService, times(1)).sendRequest(requestData);
+                verify(whatsAppService, times(1)).sendRequest(requestData, "messages");
         }
 
         // ===========================
@@ -334,7 +334,7 @@ public class WhatsAppClientTest {
                                 "type", "image",
                                 "image", validImage);
 
-                when(whatsAppService.sendRequest(expectedData)).thenReturn(expectedResponse);
+                when(whatsAppService.sendRequest(expectedData, "messages")).thenReturn(expectedResponse);
 
                 // Act
                 final WhatsAppResponse actualResponse = whatsAppClient.sendImageAsync(validTo, validImage).join();
@@ -342,7 +342,7 @@ public class WhatsAppClientTest {
                 // Assert
                 assertNotNull(actualResponse);
                 assertEquals(expectedResponse, actualResponse);
-                verify(whatsAppService, times(1)).sendRequest(expectedData);
+                verify(whatsAppService, times(1)).sendRequest(expectedData, "messages");
         }
 
         @Test
@@ -415,7 +415,7 @@ public class WhatsAppClientTest {
                                 "type", "image",
                                 "image", validImage);
 
-                when(whatsAppService.sendRequest(expectedData))
+                when(whatsAppService.sendRequest(expectedData, "messages"))
                                 .thenThrow(new WhatsAppException("Service unavailable", validTo, null, null, validTo));
 
                 // Act & Assert
@@ -542,12 +542,12 @@ public class WhatsAppClientTest {
                                 "type", "document",
                                 "document", document);
 
-                when(whatsAppService.sendRequest(requestData)).thenReturn(expectedResponse);
+                when(whatsAppService.sendRequest(requestData, "messages")).thenReturn(expectedResponse);
 
                 WhatsAppResponse actualResponse = whatsAppClient.sendDocumentAsync(validTo, document).join();
 
                 assertEquals(expectedResponse, actualResponse);
-                verify(whatsAppService, times(1)).sendRequest(requestData);
+                verify(whatsAppService, times(1)).sendRequest(requestData, "messages");
         }
 
         @Test
@@ -649,12 +649,12 @@ public class WhatsAppClientTest {
                                 "type", "video",
                                 "video", video);
 
-                when(whatsAppService.sendRequest(expectedData)).thenReturn(expectedResponse);
+                when(whatsAppService.sendRequest(expectedData, "messages")).thenReturn(expectedResponse);
 
                 WhatsAppResponse actualResponse = whatsAppClient.sendVideoAsync(validTo, video).join();
 
                 assertEquals(expectedResponse, actualResponse);
-                verify(whatsAppService, times(1)).sendRequest(expectedData);
+                verify(whatsAppService, times(1)).sendRequest(expectedData, "messages");
         }
 
         @Test
@@ -756,11 +756,11 @@ public class WhatsAppClientTest {
                                 "type", "audio",
                                 "audio", audio);
 
-                when(whatsAppService.sendRequest(expectedData)).thenReturn(expectedResponse);
+                when(whatsAppService.sendRequest(expectedData, "messages")).thenReturn(expectedResponse);
 
                 WhatsAppResponse actualResponse = whatsAppClient.sendAudioAsync(validTo, audio).join();
 
                 assertEquals(expectedResponse, actualResponse);
-                verify(whatsAppService, times(1)).sendRequest(expectedData);
+                verify(whatsAppService, times(1)).sendRequest(expectedData, "messages");
         }
 }

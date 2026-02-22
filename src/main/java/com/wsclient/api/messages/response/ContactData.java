@@ -1,7 +1,5 @@
 package com.wsclient.api.messages.response;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 /**
  * Represents a contact entry in the WhatsApp API response.
  * <p>
@@ -14,6 +12,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @param waId  The formatted WhatsApp ID associated with the contact.
  */
 public record ContactData(
-        String input,
-        @JsonProperty("wa_id") String waId) {
+                String input,
+                String waId) {
 }
