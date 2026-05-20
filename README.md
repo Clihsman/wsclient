@@ -69,7 +69,7 @@ This project uses the following dependencies:
 - [Mockito](https://site.mockito.org/)
 
 ## License
-All rights reserved.
+MIT.
 
 ## Contributing
 Feel free to open issues or submit pull requests for improvements.
