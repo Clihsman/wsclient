@@ -2,9 +2,11 @@ package com.wsclient.api.services;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URLEncoder;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -18,6 +20,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
@@ -25,6 +28,10 @@ import org.apache.http.util.EntityUtils;
 import com.wsclient.api.messages.response.WhatsAppErrorResponse;
 import com.wsclient.api.messages.response.WhatsAppResponse;
 import com.wsclient.api.messages.response.template.TemplatesResponse;
+import com.wsclient.api.templates.request.CreateTemplateRequest;
+import com.wsclient.api.templates.request.EditTemplateRequest;
+import com.wsclient.api.templates.response.CreateTemplateResponse;
+import com.wsclient.api.templates.response.TemplateActionResponse;
 import com.wsclient.api.validators.ConfigValidator;
 import com.wsclient.core.exceptions.WhatsAppException;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -253,6 +260,93 @@ public class WhatsAppServiceImpl implements WhatsAppService {
 
             } catch (IOException | ParseException | WhatsAppException e) {
                 throw new CompletionException("Failed to fetch WhatsApp templates", e);
+            }
+        });
+    }
+
+    /**
+     * Creates a new WhatsApp message template on the configured WhatsApp
+     * Business Account.
+     *
+     * @param request The template definition (name, category, language,
+     *                components) to create.
+     * @return A {@link CompletableFuture} that resolves to a
+     *         {@link CreateTemplateResponse} with the new template's ID and
+     *         initial review status.
+     */
+    @Override
+    public CompletableFuture<CreateTemplateResponse> createTemplate(CreateTemplateRequest request) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                String url = String.format("%s/%s/message_templates", whatsappApiUrl, businessAccount);
+
+                HttpPost httpPost = new HttpPost(url);
+                httpPost.setHeader("Authorization", String.format("Bearer %s", token));
+                httpPost.setHeader("Content-Type", "application/json");
+                httpPost.setEntity(new StringEntity(OBJECT_MAPPER.writeValueAsString(request), StandardCharsets.UTF_8));
+
+                String responseBody = sendRequest(httpPost);
+                return OBJECT_MAPPER.readValue(responseBody, CreateTemplateResponse.class);
+
+            } catch (Exception e) {
+                throw new CompletionException("Failed to create WhatsApp template", e);
+            }
+        });
+    }
+
+    /**
+     * Edits an existing WhatsApp message template.
+     *
+     * @param templateId The ID of the template to edit.
+     * @param request    The fields to update.
+     * @return A {@link CompletableFuture} that resolves to a
+     *         {@link TemplateActionResponse} once the edit is processed.
+     */
+    @Override
+    public CompletableFuture<TemplateActionResponse> editTemplate(String templateId, EditTemplateRequest request) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                String url = String.format("%s/%s", whatsappApiUrl, templateId);
+
+                HttpPost httpPost = new HttpPost(url);
+                httpPost.setHeader("Authorization", String.format("Bearer %s", token));
+                httpPost.setHeader("Content-Type", "application/json");
+                httpPost.setEntity(new StringEntity(OBJECT_MAPPER.writeValueAsString(request), StandardCharsets.UTF_8));
+
+                String responseBody = sendRequest(httpPost);
+                return OBJECT_MAPPER.readValue(responseBody, TemplateActionResponse.class);
+
+            } catch (Exception e) {
+                throw new CompletionException("Failed to edit WhatsApp template", e);
+            }
+        });
+    }
+
+    /**
+     * Deletes a WhatsApp message template by name (removes every language
+     * version of it).
+     *
+     * @param templateName The name of the template to delete.
+     * @return A {@link CompletableFuture} that resolves to a
+     *         {@link TemplateActionResponse} once the deletion is processed.
+     */
+    @Override
+    public CompletableFuture<TemplateActionResponse> deleteTemplate(String templateName) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                String url = String.format("%s/%s/message_templates?name=%s",
+                        whatsappApiUrl,
+                        businessAccount,
+                        URLEncoder.encode(templateName, StandardCharsets.UTF_8));
+
+                HttpDelete httpDelete = new HttpDelete(url);
+                httpDelete.setHeader("Authorization", String.format("Bearer %s", token));
+
+                String responseBody = sendRequest(httpDelete);
+                return OBJECT_MAPPER.readValue(responseBody, TemplateActionResponse.class);
+
+            } catch (Exception e) {
+                throw new CompletionException("Failed to delete WhatsApp template", e);
             }
         });
     }

@@ -39,6 +39,50 @@ client.sendInteractiveAsync("573001112233", list).join();
 
 Reglas: `body.text` requerido; el botón de la lista es requerido (máx. 20 caracteres); hasta 10 secciones, cada una con título (máx. 24 caracteres) y entre 1 y 10 filas; cada fila requiere `id` (máx. 200 caracteres) y `title` (máx. 24 caracteres); `description` es opcional (máx. 72 caracteres); los IDs de fila deben ser únicos **en todo el mensaje**, no solo dentro de una sección.
 
+## Producto único (Single Product Message)
+
+```java
+Interactive product = InteractiveFactory.createProduct()
+        .catalogId("catalog-id")
+        .productRetailerId("sku-1")
+        .build();
+
+client.sendInteractiveAsync("573001112233", product).join();
+```
+
+Reglas: `catalogId` y `productRetailerId` requeridos. A diferencia de los demás tipos, el texto del `body` es **opcional** para `PRODUCT`.
+
+## Catálogo múltiple (Multi-Product Message)
+
+```java
+Interactive productList = InteractiveFactory.createProductList()
+        .text("Elige un producto:")
+        .catalogId("catalog-id")
+        .productSection("Destacados")
+        .productItem("sku-1")
+        .productItem("sku-2")
+        .productSection("Ofertas")
+        .productItem("sku-3")
+        .build();
+
+client.sendInteractiveAsync("573001112233", productList).join();
+```
+
+Reglas: `body.text` requerido, `catalogId` requerido, hasta 10 secciones, cada una con al menos un producto (`productRetailerId` no vacío). `productItem(...)` sin llamar antes a `productSection(...)` crea una sección `"default"`, igual que `row(...)` para listas.
+
+## Botón de URL (CTA URL)
+
+```java
+Interactive ctaUrl = InteractiveFactory.createCtaUrl()
+        .text("Visita nuestro sitio")
+        .ctaUrl("Abrir", "https://example.com")
+        .build();
+
+client.sendInteractiveAsync("573001112233", ctaUrl).join();
+```
+
+Reglas: `body.text` requerido; `ctaUrl(displayText, url)` requiere ambos valores no vacíos, y `url` debe ser `http(s)://`. Internamente reutiliza el campo `InteractiveAction.parameters` (`Map<String,String>`) con las claves `display_text`/`url`, que es exactamente el shape que espera Meta.
+
 ## Construcción manual (sin el factory)
 
 También puedes construir el `Interactive` directamente si necesitas más control:
@@ -58,6 +102,3 @@ Interactive interactive = Interactive.builder()
         .build();
 ```
 
-## Otros tipos de interactivo (no soportados aún)
-
-`Interactive.InteractiveType` también declara `PRODUCT`, `PRODUCT_LIST` y `CTA_URL`, pero **`InteractiveFactory` y `WhatsAppInputValidator` solo dan soporte completo a `BUTTON` y `LIST`**. Los tipos de catálogo/CTA URL quedan fuera del alcance actual de la librería.

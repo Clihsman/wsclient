@@ -4,6 +4,7 @@ import static com.wsclient.api.constants.WhatsAppConstants.*;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -22,6 +23,7 @@ import com.wsclient.api.messages.request.contact.Contact;
 import com.wsclient.api.messages.request.interactive.Interactive;
 import com.wsclient.api.messages.request.interactive.InteractiveButton;
 import com.wsclient.api.messages.request.interactive.InteractiveButtonReply;
+import com.wsclient.api.messages.request.interactive.InteractiveProductItem;
 import com.wsclient.api.messages.request.interactive.InteractiveSection;
 import com.wsclient.api.messages.request.interactive.InteractiveSectionRow;
 import com.wsclient.api.messages.request.interactive.Interactive.InteractiveType;
@@ -135,9 +137,10 @@ public final class WhatsAppInputValidator {
             return new IllegalArgumentException("Interactive message cannot be null.");
         }
 
-        if (Objects.isNull(interactive.getBody()) ||
-                interactive.getBody().getText() == null ||
-                interactive.getBody().getText().trim().isEmpty()) {
+        if (interactive.getType() != InteractiveType.PRODUCT &&
+                (Objects.isNull(interactive.getBody()) ||
+                        interactive.getBody().getText() == null ||
+                        interactive.getBody().getText().trim().isEmpty())) {
             return new IllegalArgumentException("Interactive body text is required and cannot be empty.");
         }
 
@@ -177,6 +180,101 @@ public final class WhatsAppInputValidator {
                     interactive.getAction().getSections());
             if (exceptionValidateSectionList != null) {
                 return exceptionValidateSectionList;
+            }
+        }
+
+        if (interactive.getType().equals(InteractiveType.PRODUCT)) {
+            if (Objects.isNull(interactive.getAction())) {
+                return new IllegalArgumentException("Action cannot be null for product interactive messages.");
+            }
+
+            if (interactive.getAction().getCatalogId() == null || interactive.getAction().getCatalogId().isBlank()) {
+                return new IllegalArgumentException("Product interactive must have a catalog ID.");
+            }
+
+            if (interactive.getAction().getProductRetailerId() == null
+                    || interactive.getAction().getProductRetailerId().isBlank()) {
+                return new IllegalArgumentException("Product interactive must have a product retailer ID.");
+            }
+        }
+
+        if (interactive.getType().equals(InteractiveType.PRODUCT_LIST)) {
+            if (Objects.isNull(interactive.getAction())) {
+                return new IllegalArgumentException("Action cannot be null for product list interactive messages.");
+            }
+
+            if (interactive.getAction().getCatalogId() == null || interactive.getAction().getCatalogId().isBlank()) {
+                return new IllegalArgumentException("Product list interactive must have a catalog ID.");
+            }
+
+            final IllegalArgumentException exceptionValidateProductSectionList = validateProductSectionList(
+                    interactive.getAction().getSections());
+            if (exceptionValidateProductSectionList != null) {
+                return exceptionValidateProductSectionList;
+            }
+        }
+
+        if (interactive.getType().equals(InteractiveType.CTA_URL)) {
+            if (Objects.isNull(interactive.getAction())) {
+                return new IllegalArgumentException("Action cannot be null for CTA URL interactive messages.");
+            }
+
+            final Map<String, String> parameters = interactive.getAction().getParameters();
+            final String displayText = parameters != null ? parameters.get("display_text") : null;
+            final String url = parameters != null ? parameters.get("url") : null;
+
+            if (displayText == null || displayText.isBlank()) {
+                return new IllegalArgumentException("CTA URL interactive must have a 'display_text' parameter.");
+            }
+
+            if (url == null || url.isBlank()) {
+                return new IllegalArgumentException("CTA URL interactive must have a 'url' parameter.");
+            }
+
+            if (!url.matches("^https?://.+")) {
+                return new IllegalArgumentException("Invalid CTA URL. Only HTTP/HTTPS URLs are allowed.");
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Validates a list of interactive sections used in Multi-Product Messages
+     * ({@code product_list}).
+     *
+     * @param productSections the list of {@link InteractiveSection} objects to
+     *                        validate; each section is expected to carry
+     *                        {@code productItems} rather than {@code rows}.
+     * @return an {@link IllegalArgumentException} describing the first
+     *         validation error found, or {@code null} if the list is valid.
+     */
+    private static IllegalArgumentException validateProductSectionList(List<InteractiveSection> productSections) {
+
+        if (productSections == null || productSections.isEmpty()) {
+            return new IllegalArgumentException("Product list interactive must contain at least one section.");
+        }
+
+        if (productSections.size() > INTERACTIVE_MAX_SECTIONS) {
+            return new IllegalArgumentException(
+                    String.format("You can include up to %d sections maximum.", INTERACTIVE_MAX_SECTIONS));
+        }
+
+        for (InteractiveSection section : productSections) {
+            if (section == null) {
+                return new IllegalArgumentException("Product list section cannot be null.");
+            }
+
+            List<InteractiveProductItem> productItems = section.getProductItems();
+
+            if (productItems == null || productItems.isEmpty()) {
+                return new IllegalArgumentException("Each product list section must contain at least one product.");
+            }
+
+            for (InteractiveProductItem item : productItems) {
+                if (item == null || item.getProductRetailerId() == null || item.getProductRetailerId().isBlank()) {
+                    return new IllegalArgumentException("Each product item must have a non-empty product retailer ID.");
+                }
             }
         }
 

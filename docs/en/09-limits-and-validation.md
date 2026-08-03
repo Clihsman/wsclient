@@ -72,4 +72,29 @@ How many parameters the template already registered with Meta actually expects i
 | Row `title` | required, max. `INTERACTIVE_MAX_ROW_TITLE_LENGTH` (24) characters |
 | Row `description` | optional, max. `INTERACTIVE_MAX_ROW_DESCRIPTION_LENGTH` (72) characters |
 
+## Interactive — single product
+
+| Rule | Value |
+|---|---|
+| `body.text` | **optional** (unlike the other types) |
+| `catalogId` | required |
+| `productRetailerId` | required |
+
+## Interactive — multi-product
+
+| Rule | Value |
+|---|---|
+| `body.text` | required |
+| `catalogId` | required |
+| Number of sections | `INTERACTIVE_MIN_SECTIONS` (1) to `INTERACTIVE_MAX_SECTIONS` (10) |
+| Products per section | at least 1, each with a non-blank `productRetailerId` |
+
+## Interactive — CTA URL button
+
+| Rule | Value |
+|---|---|
+| `body.text` | required |
+| `parameters["display_text"]` | required, non-blank |
+| `parameters["url"]` | required, non-blank, must be `http(s)://` |
+
 These interactive types are built with `InteractiveFactory` — see [Interactive messages](03-interactive-messages.md).

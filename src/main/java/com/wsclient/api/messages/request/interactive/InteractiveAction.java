@@ -3,6 +3,8 @@ package com.wsclient.api.messages.request.interactive;
 import java.util.List;
 import java.util.Map;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.Builder;
 import lombok.Data;
 
@@ -70,8 +72,42 @@ public class InteractiveAction {
      */
     private List<InteractiveSection> sections;
 
-    /***
-     * parameters
+    /**
+     * <strong>
+     * Required for {@code cta_url} messages.
+     * </strong>
+     *
+     * <p>
+     * A map of the CTA URL button's parameters. For {@code cta_url}, WhatsApp
+     * expects the keys {@code display_text} and {@code url}, which is exactly
+     * how this map serializes.
+     * </p>
      */
     private Map<String, String> parameters;
+
+    /**
+     * <strong>
+     * Required for {@code product} and {@code product_list} messages.
+     * </strong>
+     *
+     * <p>
+     * The ID of the catalog connected to the WhatsApp Business Account that
+     * the referenced product(s) belong to.
+     * </p>
+     */
+    @JsonProperty("catalog_id")
+    private String catalogId;
+
+    /**
+     * <strong>
+     * Required for {@code product} messages (Single Product Messages).
+     * </strong>
+     *
+     * <p>
+     * Unique identifier of the product in the catalog referenced by
+     * {@link #catalogId}.
+     * </p>
+     */
+    @JsonProperty("product_retailer_id")
+    private String productRetailerId;
 }

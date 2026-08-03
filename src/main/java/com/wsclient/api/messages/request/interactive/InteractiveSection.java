@@ -3,6 +3,8 @@ package com.wsclient.api.messages.request.interactive;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -47,5 +49,19 @@ public class InteractiveSection {
      */
     @Builder.Default
     private List<InteractiveSectionRow> rows = new ArrayList<>();
+
+    /**
+     * <strong>
+     * Required for Multi-Product Messages ({@code product_list}).
+     * </strong>
+     *
+     * <p>
+     * The array of products in this section, referenced by their catalog
+     * {@code product_retailer_id}. Mutually exclusive with {@link #rows},
+     * which is used for List Messages instead.
+     * </p>
+     */
+    @JsonProperty("product_items")
+    private List<InteractiveProductItem> productItems;
 
 }

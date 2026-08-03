@@ -96,4 +96,48 @@ public class FacebookAuthServiceImplTest {
 
         assertInstanceOf(WhatsAppException.class, exception.getCause());
     }
+
+    @Test
+    void exchangeCodeForUserToken_ShouldReturnParsedToken_WhenRequestSucceeds() throws Exception {
+        String baseUrl = startServer(200, "{\"access_token\":\"user-token\",\"token_type\":\"bearer\"}");
+
+        FacebookAuthService authService = new FacebookAuthServiceImpl();
+        authService.configure(baseUrl);
+
+        FBAccessToken token = authService.exchangeCodeForUserToken(
+                "client-id", "client-secret", "https://example.com/callback", "auth-code").join();
+
+        assertEquals("user-token", token.accessToken());
+        assertEquals("bearer", token.tokenType());
+    }
+
+    @Test
+    void getLongLivedToken_ShouldReturnParsedTokenWithExpiry_WhenRequestSucceeds() throws Exception {
+        String baseUrl = startServer(200,
+                "{\"access_token\":\"long-lived-token\",\"token_type\":\"bearer\",\"expires_in\":5184000}");
+
+        FacebookAuthService authService = new FacebookAuthServiceImpl();
+        authService.configure(baseUrl);
+
+        FBAccessToken token = authService.getLongLivedToken("client-id", "client-secret", "short-lived-token")
+                .join();
+
+        assertEquals("long-lived-token", token.accessToken());
+        assertEquals(5184000L, token.expiresIn());
+    }
+
+    @Test
+    void getLongLivedToken_ShouldThrowWhatsAppException_WhenApiReturnsError() throws Exception {
+        String errorJson = "{\"error\":{\"message\":\"Invalid token\",\"type\":\"OAuthException\","
+                + "\"code\":190,\"error_subcode\":0,\"fbtrace_id\":\"trace-4\"}}";
+        String baseUrl = startServer(400, errorJson);
+
+        FacebookAuthService authService = new FacebookAuthServiceImpl();
+        authService.configure(baseUrl);
+
+        CompletionException exception = assertThrows(CompletionException.class,
+                () -> authService.getLongLivedToken("client-id", "client-secret", "expired-token").join());
+
+        assertInstanceOf(WhatsAppException.class, exception.getCause());
+    }
 }

@@ -74,3 +74,56 @@ templates.getData().forEach(t -> System.out.println(t.getName() + " - " + t.getS
 ```
 
 Si usas `WhatsAppClientImpl` para el resto de la app, puedes seguir compartiendo la misma instancia de `WhatsAppService` — solo asegúrate de haber llamado también a `service.configureWhatsAppApi(...)` con el `businessAccount`, ya que `WhatsAppClientImpl.configureWhatsAppApi` lo deja en `null`.
+
+## Crear, editar y eliminar plantillas
+
+Estos métodos también viven en `WhatsAppService` (mismo motivo: necesitan el `businessAccount`) y usan un conjunto de modelos **distinto** al de envío: `com.wsclient.api.templates.request`/`response`, porque definir una plantilla (texto con placeholders `{{1}}`, `example`, botones con `url`/`phone_number`) tiene una forma distinta a la de rellenar los parámetros de una plantilla ya aprobada.
+
+### Crear
+
+```java
+import com.wsclient.api.templates.request.CreateTemplateRequest;
+import com.wsclient.api.templates.request.TemplateDefinitionComponent;
+import com.wsclient.api.templates.response.CreateTemplateResponse;
+import java.util.List;
+import java.util.Map;
+
+CreateTemplateRequest request = CreateTemplateRequest.builder()
+        .name("order_confirmation")
+        .category("UTILITY") // AUTHENTICATION | MARKETING | UTILITY
+        .language("es_CO")
+        .components(List.of(
+                TemplateDefinitionComponent.builder()
+                        .type("BODY")
+                        .text("Tu pedido {{1}} fue confirmado.")
+                        .example(Map.of("body_text", List.of(List.of("order-123"))))
+                        .build()))
+        .build();
+
+CreateTemplateResponse response = service.createTemplate(request).join();
+System.out.println(response.id() + " - " + response.status());
+```
+
+### Editar
+
+Solo se pueden cambiar `category` y/o `components` (no `name` ni `language`); editar una plantilla reinicia su estado de revisión.
+
+```java
+import com.wsclient.api.templates.request.EditTemplateRequest;
+
+EditTemplateRequest request = EditTemplateRequest.builder()
+        .category("MARKETING")
+        .build();
+
+service.editTemplate("TEMPLATE_ID", request).join(); // TemplateActionResponse(success)
+```
+
+### Eliminar
+
+```java
+service.deleteTemplate("order_confirmation").join(); // TemplateActionResponse(success)
+```
+
+Elimina **todas** las versiones de idioma de la plantilla con ese nombre.
+
+`createTemplate`/`editTemplate`/`deleteTemplate` no pasan por `WhatsAppInputValidator` — cualquier error de formato o de la definición de la plantilla lo reporta la API de Meta como `WhatsAppException`.

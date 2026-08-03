@@ -12,6 +12,10 @@ import org.apache.http.client.methods.HttpPost;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.wsclient.api.messages.response.WhatsAppResponse;
 import com.wsclient.api.messages.response.template.TemplatesResponse;
+import com.wsclient.api.templates.request.CreateTemplateRequest;
+import com.wsclient.api.templates.request.EditTemplateRequest;
+import com.wsclient.api.templates.response.CreateTemplateResponse;
+import com.wsclient.api.templates.response.TemplateActionResponse;
 import com.wsclient.core.exceptions.WhatsAppException;
 
 /**
@@ -211,6 +215,46 @@ public interface WhatsAppService {
          *         containing the list of available templates.
          */
         public CompletableFuture<TemplatesResponse> getTamplates();
+
+        /**
+         * Creates a new WhatsApp message template on the configured WhatsApp
+         * Business Account.
+         *
+         * @param request The template definition (name, category, language,
+         *                components) to create.
+         * @return A {@link CompletableFuture} that resolves to a
+         *         {@link CreateTemplateResponse} with the new template's ID and
+         *         initial review status.
+         */
+        public CompletableFuture<CreateTemplateResponse> createTemplate(CreateTemplateRequest request);
+
+        /**
+         * Edits an existing WhatsApp message template.
+         * <p>
+         * Editing a template resets its approval status; only {@code category}
+         * and {@code components} can be changed.
+         * </p>
+         *
+         * @param templateId The ID of the template to edit (as returned by
+         *                   {@link #createTemplate(CreateTemplateRequest)} or
+         *                   {@link #getTamplates()}).
+         * @param request    The fields to update.
+         * @return A {@link CompletableFuture} that resolves to a
+         *         {@link TemplateActionResponse} once the edit is processed.
+         */
+        public CompletableFuture<TemplateActionResponse> editTemplate(String templateId, EditTemplateRequest request);
+
+        /**
+         * Deletes a WhatsApp message template by name.
+         * <p>
+         * Deleting by name removes every language version of the template.
+         * </p>
+         *
+         * @param templateName The name of the template to delete.
+         * @return A {@link CompletableFuture} that resolves to a
+         *         {@link TemplateActionResponse} once the deletion is processed.
+         */
+        public CompletableFuture<TemplateActionResponse> deleteTemplate(String templateName);
 
         /**
          * Returns the WhatsApp Phone Number ID associated with the current client

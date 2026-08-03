@@ -72,4 +72,29 @@ No se valida cuántos parámetros espera la plantilla ya registrada en Meta — 
 | `title` de fila | requerido, máx. `INTERACTIVE_MAX_ROW_TITLE_LENGTH` (24) caracteres |
 | `description` de fila | opcional, máx. `INTERACTIVE_MAX_ROW_DESCRIPTION_LENGTH` (72) caracteres |
 
+## Interactivo — producto único
+
+| Regla | Valor |
+|---|---|
+| `body.text` | **opcional** (a diferencia de los demás tipos) |
+| `catalogId` | requerido |
+| `productRetailerId` | requerido |
+
+## Interactivo — catálogo múltiple
+
+| Regla | Valor |
+|---|---|
+| `body.text` | requerido |
+| `catalogId` | requerido |
+| Cantidad de secciones | `INTERACTIVE_MIN_SECTIONS` (1) a `INTERACTIVE_MAX_SECTIONS` (10) |
+| Productos por sección | al menos 1, cada uno con `productRetailerId` no vacío |
+
+## Interactivo — botón CTA URL
+
+| Regla | Valor |
+|---|---|
+| `body.text` | requerido |
+| `parameters["display_text"]` | requerido, no vacío |
+| `parameters["url"]` | requerido, no vacío, debe ser `http(s)://` |
+
 Estos tipos de interactivo se construyen con `InteractiveFactory` — ver [Mensajes interactivos](03-interactive-messages.md).

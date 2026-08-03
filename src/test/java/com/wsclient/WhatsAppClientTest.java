@@ -1028,6 +1028,190 @@ public class WhatsAppClientTest {
         }
 
         // ===========================
+        // INTERACTIVE MESSAGES (CATALOG/CTA_URL)
+        // ===========================
+
+        @Test
+        void testInteractiveProduct_MissingCatalogId_ShouldThrow() {
+                final String validTo = "3001111222";
+                final Interactive invalidProduct = InteractiveFactory.createProduct()
+                                .productRetailerId("sku-1")
+                                .build();
+
+                CompletionException exception = assertThrows(
+                                CompletionException.class,
+                                () -> whatsAppClient.sendInteractiveAsync(validTo, invalidProduct).join());
+
+                assertInstanceOf(IllegalArgumentException.class, exception.getCause());
+                assertEquals("Product interactive must have a catalog ID.", exception.getCause().getMessage());
+        }
+
+        @Test
+        void testInteractiveProduct_MissingProductRetailerId_ShouldThrow() {
+                final String validTo = "3001111222";
+                final Interactive invalidProduct = InteractiveFactory.createProduct()
+                                .catalogId("catalog-1")
+                                .build();
+
+                CompletionException exception = assertThrows(
+                                CompletionException.class,
+                                () -> whatsAppClient.sendInteractiveAsync(validTo, invalidProduct).join());
+
+                assertInstanceOf(IllegalArgumentException.class, exception.getCause());
+                assertEquals("Product interactive must have a product retailer ID.", exception.getCause().getMessage());
+        }
+
+        @Test
+        void testSendInteractiveProduct_ShouldReturnResponse_WhenValid()
+                        throws IOException, InterruptedException, WhatsAppException {
+                final String validPhoneNumber = "3001111222";
+
+                final Interactive product = InteractiveFactory.createProduct()
+                                .catalogId("catalog-1")
+                                .productRetailerId("sku-1")
+                                .build();
+
+                final WhatsAppResponse expectedResponse = new WhatsAppResponse(validPhoneNumber, null, null);
+
+                Map<String, Object> requestData = Map.of(
+                                "messaging_product", "whatsapp",
+                                "to", validPhoneNumber,
+                                "type", "interactive",
+                                "interactive", product);
+
+                when(whatsAppService.sendRequest(requestData, "messages")).thenReturn(expectedResponse);
+
+                final WhatsAppResponse actualResponse = whatsAppClient
+                                .sendInteractiveAsync(validPhoneNumber, product).join();
+
+                assertEquals(expectedResponse, actualResponse);
+                verify(whatsAppService, times(1)).sendRequest(requestData, "messages");
+        }
+
+        @Test
+        void testInteractiveProductList_MissingCatalogId_ShouldThrow() {
+                final String validTo = "3001111222";
+                final Interactive invalidProductList = InteractiveFactory.createProductList()
+                                .text("Check out our products:")
+                                .productSection("Featured")
+                                .productItem("sku-1")
+                                .build();
+
+                CompletionException exception = assertThrows(
+                                CompletionException.class,
+                                () -> whatsAppClient.sendInteractiveAsync(validTo, invalidProductList).join());
+
+                assertInstanceOf(IllegalArgumentException.class, exception.getCause());
+                assertEquals("Product list interactive must have a catalog ID.", exception.getCause().getMessage());
+        }
+
+        @Test
+        void testInteractiveProductList_NoSections_ShouldThrow() {
+                final String validTo = "3001111222";
+                final Interactive invalidProductList = InteractiveFactory.createProductList()
+                                .text("Check out our products:")
+                                .catalogId("catalog-1")
+                                .build();
+
+                CompletionException exception = assertThrows(
+                                CompletionException.class,
+                                () -> whatsAppClient.sendInteractiveAsync(validTo, invalidProductList).join());
+
+                assertInstanceOf(IllegalArgumentException.class, exception.getCause());
+                assertEquals("Product list interactive must contain at least one section.",
+                                exception.getCause().getMessage());
+        }
+
+        @Test
+        void testSendInteractiveProductList_ShouldReturnResponse_WhenValid()
+                        throws IOException, InterruptedException, WhatsAppException {
+                final String validPhoneNumber = "3001111222";
+
+                final Interactive productList = InteractiveFactory.createProductList()
+                                .text("Check out our products:")
+                                .catalogId("catalog-1")
+                                .productSection("Featured")
+                                .productItem("sku-1")
+                                .productItem("sku-2")
+                                .build();
+
+                final WhatsAppResponse expectedResponse = new WhatsAppResponse(validPhoneNumber, null, null);
+
+                Map<String, Object> requestData = Map.of(
+                                "messaging_product", "whatsapp",
+                                "to", validPhoneNumber,
+                                "type", "interactive",
+                                "interactive", productList);
+
+                when(whatsAppService.sendRequest(requestData, "messages")).thenReturn(expectedResponse);
+
+                final WhatsAppResponse actualResponse = whatsAppClient
+                                .sendInteractiveAsync(validPhoneNumber, productList).join();
+
+                assertEquals(expectedResponse, actualResponse);
+                verify(whatsAppService, times(1)).sendRequest(requestData, "messages");
+        }
+
+        @Test
+        void testInteractiveCtaUrl_MissingParameters_ShouldThrow() {
+                final String validTo = "3001111222";
+                final Interactive invalidCtaUrl = InteractiveFactory.createCtaUrl()
+                                .text("Visit our site")
+                                .build();
+
+                CompletionException exception = assertThrows(
+                                CompletionException.class,
+                                () -> whatsAppClient.sendInteractiveAsync(validTo, invalidCtaUrl).join());
+
+                assertInstanceOf(IllegalArgumentException.class, exception.getCause());
+                assertEquals("CTA URL interactive must have a 'display_text' parameter.",
+                                exception.getCause().getMessage());
+        }
+
+        @Test
+        void testInteractiveCtaUrl_InvalidUrl_ShouldThrow() {
+                final String validTo = "3001111222";
+                final Interactive invalidCtaUrl = InteractiveFactory.createCtaUrl()
+                                .text("Visit our site")
+                                .ctaUrl("Open", "ftp://example.com")
+                                .build();
+
+                CompletionException exception = assertThrows(
+                                CompletionException.class,
+                                () -> whatsAppClient.sendInteractiveAsync(validTo, invalidCtaUrl).join());
+
+                assertInstanceOf(IllegalArgumentException.class, exception.getCause());
+                assertEquals("Invalid CTA URL. Only HTTP/HTTPS URLs are allowed.", exception.getCause().getMessage());
+        }
+
+        @Test
+        void testSendInteractiveCtaUrl_ShouldReturnResponse_WhenValid()
+                        throws IOException, InterruptedException, WhatsAppException {
+                final String validPhoneNumber = "3001111222";
+
+                final Interactive ctaUrl = InteractiveFactory.createCtaUrl()
+                                .text("Visit our site")
+                                .ctaUrl("Open", "https://example.com")
+                                .build();
+
+                final WhatsAppResponse expectedResponse = new WhatsAppResponse(validPhoneNumber, null, null);
+
+                Map<String, Object> requestData = Map.of(
+                                "messaging_product", "whatsapp",
+                                "to", validPhoneNumber,
+                                "type", "interactive",
+                                "interactive", ctaUrl);
+
+                when(whatsAppService.sendRequest(requestData, "messages")).thenReturn(expectedResponse);
+
+                final WhatsAppResponse actualResponse = whatsAppClient
+                                .sendInteractiveAsync(validPhoneNumber, ctaUrl).join();
+
+                assertEquals(expectedResponse, actualResponse);
+                verify(whatsAppService, times(1)).sendRequest(requestData, "messages");
+        }
+
+        // ===========================
         // INTERACTIVE TYPE ENUM
         // ===========================
 

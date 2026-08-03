@@ -1,6 +1,7 @@
 package com.wsclient.api.services;
 
 import java.io.IOException;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
@@ -36,9 +37,41 @@ public class FacebookAuthServiceImpl implements FacebookAuthService {
 
     @Override
     public CompletableFuture<FBAccessToken> getAppAccessToken(String clientId, String clientSecret) {
+        return requestToken(String.format("client_id=%s&client_secret=%s&grant_type=client_credentials",
+                clientId, clientSecret));
+    }
+
+    @Override
+    public CompletableFuture<FBAccessToken> exchangeCodeForUserToken(String clientId, String clientSecret,
+            String redirectUri, String code) {
+        return requestToken(String.format("client_id=%s&client_secret=%s&redirect_uri=%s&code=%s",
+                clientId, clientSecret,
+                URLEncoder.encode(redirectUri, StandardCharsets.UTF_8),
+                URLEncoder.encode(code, StandardCharsets.UTF_8)));
+    }
+
+    @Override
+    public CompletableFuture<FBAccessToken> getLongLivedToken(String clientId, String clientSecret,
+            String shortLivedToken) {
+        return requestToken(String.format("grant_type=fb_exchange_token&client_id=%s&client_secret=%s"
+                + "&fb_exchange_token=%s",
+                clientId, clientSecret,
+                URLEncoder.encode(shortLivedToken, StandardCharsets.UTF_8)));
+    }
+
+    /**
+     * Executes a GET request against the configured Graph API OAuth endpoint
+     * with the given query string and parses the response into an
+     * {@link FBAccessToken}.
+     *
+     * @param queryParams the already-encoded query string (without the
+     *                    leading {@code ?}) to append to {@link #graphApiUrl}.
+     * @return a {@link CompletableFuture} that resolves to the parsed token
+     *         response.
+     */
+    private CompletableFuture<FBAccessToken> requestToken(String queryParams) {
         return CompletableFuture.supplyAsync(() -> {
-            String url = String.format("%s?client_id=%s&client_secret=%s&grant_type=client_credentials",
-                    graphApiUrl, clientId, clientSecret);
+            String url = graphApiUrl + "?" + queryParams;
 
             try (CloseableHttpClient httpClient = HttpClients.createDefault();
                     CloseableHttpResponse response = httpClient.execute(new HttpGet(url))) {
