@@ -1,0 +1,66 @@
+# Limits and validation
+
+`WhatsAppInputValidator` (`com.wsclient.api.validators.WhatsAppInputValidator`) applies these rules **before** making any API call — saving you from spending WhatsApp API quota on requests you already know will fail. Numeric limits are centralized in `com.wsclient.api.constants.WhatsAppConstants`.
+
+Note: `configureWhatsAppApi`/`ConfigValidator` is the exception — those methods throw `IllegalArgumentException` directly instead of returning it wrapped in a future (see [Error handling](08-error-handling.md)).
+
+## Recipient (`to`)
+
+Applies to **all** sending methods: must be non-null and contain only digits (no `+`, spaces, or dashes), e.g. `"573001112233"`.
+
+## Text
+
+| Rule | Value |
+|---|---|
+| Minimum length | `MESSAGE_MIN_TEXT` = 1 |
+| Maximum length | `MESSAGE_MAX_TEXT` = 4096 |
+
+## Media (image, video, audio, document, sticker)
+
+- `id` **or** `link` required (both cannot be blank).
+- If `link` is present, it must start with `http://` or `https://`.
+- `caption`: max 1024 characters — **not allowed** for audio or sticker.
+- `filename`: **required** for documents (max. 240 characters) — **not allowed** for image, video, audio, or sticker.
+
+## Location
+
+| Field | Rule |
+|---|---|
+| `latitude` | required, numeric, between `LOCATION_MIN_LATITUDE` (-90) and `LOCATION_MAX_LATITUDE` (90) |
+| `longitude` | required, numeric, between `LOCATION_MIN_LONGITUDE` (-180) and `LOCATION_MAX_LONGITUDE` (180) |
+
+## Reaction
+
+- `message_id` required, non-blank.
+- `emoji` cannot be `null` (an empty string `""` is valid and means "remove reaction").
+
+## Contacts
+
+- The list must contain at least one `Contact`.
+- Each `Contact` requires a `name` with a non-empty `formattedName` (the only mandatory field of the `Contact` object; addresses, emails, phones, org, and urls are optional).
+
+## Interactive — buttons
+
+| Rule | Value |
+|---|---|
+| `body.text` | required |
+| Number of buttons | between `INTERACTIVE_MIN_BUTTONS` (1) and `INTERACTIVE_MAX_BUTTONS` (3) |
+| Button title | 1 to 20 characters |
+| Button IDs | unique within the message |
+
+## Interactive — lists
+
+| Rule | Value |
+|---|---|
+| `body.text` | required |
+| List button text | required, max. 20 characters |
+| Number of sections | 1 to 10 |
+| Section title | required, max. 24 characters |
+| Rows per section | 1 to 10 |
+| Row `id` | required, max. 200 characters, **unique across the whole message** (not just within the section) |
+| Row `title` | required, max. 24 characters |
+| Row `description` | optional, max. 72 characters |
+
+> `WhatsAppConstants` also declares `INTERACTIVE_MIN_LIST_ROWS`, `INTERACTIVE_MAX_LIST_ROWS`, `INTERACTIVE_MAX_ROW_TITLE_LENGTH`, and `INTERACTIVE_MAX_ROW_DESCRIPTION_LENGTH` with these same values, but the list validator currently compares against literals (`10`, `24`, `72`) instead of those constants — the values match today, but changing a constant won't change actual behavior until the validator is updated to use it.
+
+These interactive types are built with `InteractiveFactory` — see [Interactive messages](03-interactive-messages.md).
