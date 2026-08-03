@@ -3,6 +3,9 @@
 ## Overview
 WhatsApp Client is a Java-based library designed to facilitate communication with the WhatsApp API. It provides validation mechanisms and message-sending functionalities, ensuring that all interactions comply with WhatsApp's standards.
 
+## Documentation
+Full usage documentation (configuration, sending every message type, templates, media upload, business profile, webhooks, error handling, and validation limits) lives in [`docs/`](docs/README.md).
+
 ## Project Structure
 ````bash
 ├── src/  
