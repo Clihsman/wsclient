@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
 import org.apache.http.ParseException;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 
@@ -168,6 +169,33 @@ public interface WhatsAppService {
          *                           HTTP status.
          */
         public String sendRequest(HttpGet HttpGet) throws IOException, WhatsAppException;
+
+        /**
+         * Sends an HTTP DELETE request to the WhatsApp Cloud API using the provided
+         * request.
+         * <p>
+         * This method executes a synchronous {@link HttpDelete} request against the
+         * WhatsApp Cloud API. It is intended for low-level API interactions, such as
+         * deleting an uploaded media resource, and is typically invoked internally by
+         * higher-level client operations.
+         * </p>
+         *
+         * @param httpDelete
+         *                   The pre-configured {@link HttpDelete} request instance to
+         *                   be executed.
+         *
+         * @return The raw response body returned by the WhatsApp Cloud API as a
+         *         {@link String}.
+         *
+         * @throws IOException
+         *                           If an I/O error occurs while sending or receiving
+         *                           the HTTP request.
+         *
+         * @throws WhatsAppException
+         *                           If the WhatsApp Cloud API returns an error response
+         *                           or a non-success HTTP status.
+         */
+        public String sendRequest(HttpDelete httpDelete) throws IOException, WhatsAppException;
 
         /**
          * Retrieves the list of available WhatsApp message templates.

@@ -1,9 +1,13 @@
 package com.wsclient;
 
+import com.wsclient.api.messages.response.DeleteMediaResponse;
+import com.wsclient.api.messages.response.MediaInfoResponse;
 import com.wsclient.api.messages.response.MediaResponse;
 import com.wsclient.api.services.WhatsAppMediaServiceImpl;
 import com.wsclient.api.services.WhatsAppService;
 
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -82,5 +86,45 @@ public class WhatsAppMediaServiceImplTest {
         // Assert
         assertNotNull(result);
         assertEquals("media-id", result.id());
+    }
+
+    @Test
+    void getMedia_withValidMediaId_shouldReturnMediaInfoResponse() throws Exception {
+        String expectedResponse = "{\"messaging_product\":\"whatsapp\",\"url\":\"https://example.com/media-id\","
+                + "\"mime_type\":\"image/jpeg\",\"sha256\":\"abc123\",\"file_size\":\"1024\",\"id\":\"media-id\"}";
+        when(mockService.sendRequest(any(HttpGet.class))).thenReturn(expectedResponse);
+
+        MediaInfoResponse result = mediaService.getMedia("media-id").get();
+
+        assertNotNull(result);
+        assertEquals("media-id", result.id());
+        assertEquals("https://example.com/media-id", result.url());
+        assertEquals("image/jpeg", result.mimeType());
+    }
+
+    @Test
+    void getMedia_withNullMediaId_shouldThrowException() {
+        Exception exception = assertThrows(CompletionException.class, () -> mediaService.getMedia(null).join());
+
+        assertTrue(exception.getCause() instanceof IllegalArgumentException);
+        assertEquals("Media ID must not be null or blank.", exception.getCause().getMessage());
+    }
+
+    @Test
+    void deleteMedia_withValidMediaId_shouldReturnSuccess() throws Exception {
+        when(mockService.sendRequest(any(HttpDelete.class))).thenReturn("{\"success\":true}");
+
+        DeleteMediaResponse result = mediaService.deleteMedia("media-id").get();
+
+        assertNotNull(result);
+        assertTrue(result.success());
+    }
+
+    @Test
+    void deleteMedia_withBlankMediaId_shouldThrowException() {
+        Exception exception = assertThrows(CompletionException.class, () -> mediaService.deleteMedia("  ").join());
+
+        assertTrue(exception.getCause() instanceof IllegalArgumentException);
+        assertEquals("Media ID must not be null or blank.", exception.getCause().getMessage());
     }
 }

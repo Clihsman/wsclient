@@ -48,3 +48,20 @@ client.sendDocumentAsync("573001112233", document).join();
 ```
 
 El mismo patrón aplica a imagen, video, audio y sticker — usa `mediaService.uploadMedia(...)` para obtener el `id` y pásalo a `Media.builder().id(...)` en el `send*Async` correspondiente.
+
+## Consultar y eliminar media subida
+
+```java
+import com.wsclient.api.messages.response.MediaInfoResponse;
+import com.wsclient.api.messages.response.DeleteMediaResponse;
+
+MediaInfoResponse info = mediaService.getMedia(mediaId).join();
+System.out.println(info.url());      // URL de descarga temporal
+System.out.println(info.mimeType());
+System.out.println(info.fileSize());
+
+DeleteMediaResponse deleted = mediaService.deleteMedia(mediaId).join();
+System.out.println(deleted.success());
+```
+
+`getMedia` retorna una URL de descarga **temporal** (expira después de un tiempo corto y requiere el mismo token de acceso usado para solicitarla). Ambos métodos lanzan `IllegalArgumentException` (envuelto en `CompletionException`) si `mediaId` es nulo o vacío.

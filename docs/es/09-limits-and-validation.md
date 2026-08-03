@@ -39,6 +39,17 @@ Aplica a **todos** los métodos de envío: debe ser no nulo y contener solo díg
 - La lista debe tener al menos un `Contact`.
 - Cada `Contact` requiere `name` con `formattedName` no vacío (es el único campo obligatorio del objeto `Contact`; direcciones, emails, teléfonos, org y urls son opcionales).
 
+## Plantillas (templates)
+
+| Regla | Valor |
+|---|---|
+| `name` | requerido, no vacío |
+| `language` | requerido, con `code` no vacío |
+| Parámetro de texto en `header` | máx. `TEMPLATE_HEADER_TEXT_MAX_LENGTH` (60) caracteres |
+| Parámetro de texto en `body`/`button` | máx. `TEMPLATE_BODY_TEXT_MAX_LENGTH` (1024) caracteres |
+
+No se valida cuántos parámetros espera la plantilla ya registrada en Meta — ver [Plantillas](04-templates.md).
+
 ## Interactivo — botones
 
 | Regla | Valor |

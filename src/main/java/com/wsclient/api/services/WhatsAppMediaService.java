@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.concurrent.CompletableFuture;
 
+import com.wsclient.api.messages.response.DeleteMediaResponse;
+import com.wsclient.api.messages.response.MediaInfoResponse;
 import com.wsclient.api.messages.response.MediaResponse;
 
 /**
@@ -49,4 +51,25 @@ public interface WhatsAppMediaService {
      *                     the upload process.
      */
     CompletableFuture<MediaResponse> uploadMedia(String filePath, String fileName, String type) throws IOException;
+
+    /**
+     * Retrieves the details (including a temporary download URL) of a
+     * previously uploaded media resource.
+     *
+     * @param mediaId the ID of the media resource to look up.
+     * @return a {@link CompletableFuture} that will complete with the media's
+     *         details once the request is successful.
+     * @throws IOException if an I/O error occurs during the request.
+     */
+    CompletableFuture<MediaInfoResponse> getMedia(String mediaId) throws IOException;
+
+    /**
+     * Deletes a previously uploaded media resource from the server.
+     *
+     * @param mediaId the ID of the media resource to delete.
+     * @return a {@link CompletableFuture} that will complete with the deletion
+     *         result once the request is successful.
+     * @throws IOException if an I/O error occurs during the request.
+     */
+    CompletableFuture<DeleteMediaResponse> deleteMedia(String mediaId) throws IOException;
 }

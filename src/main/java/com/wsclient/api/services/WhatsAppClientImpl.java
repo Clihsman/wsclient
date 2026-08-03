@@ -204,6 +204,11 @@ public class WhatsAppClientImpl implements WhatsAppClient {
 
     @Override
     public CompletableFuture<WhatsAppResponse> sendTemplate(String to, Template template) {
+        final IllegalArgumentException exception = validateTemplateInput(to, template);
+        if (exception != null) {
+            return CompletableFuture.failedFuture(exception);
+        }
+
         Map<String, Object> data = Map.of(
                 "messaging_product", "whatsapp",
                 "recipient_type", "individual",

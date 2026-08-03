@@ -9,6 +9,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
 import org.apache.http.HttpEntity;
+import org.apache.http.client.methods.HttpDelete;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
@@ -17,6 +19,8 @@ import org.apache.http.entity.mime.content.InputStreamBody;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.wsclient.api.messages.response.DeleteMediaResponse;
+import com.wsclient.api.messages.response.MediaInfoResponse;
 import com.wsclient.api.messages.response.MediaResponse;
 import com.wsclient.api.validators.ConfigValidator;
 
@@ -121,6 +125,70 @@ public class WhatsAppMediaServiceImpl implements WhatsAppMediaService {
                 throw new CompletionException(ex);
             }
         });
+    }
+
+    /**
+     * Retrieves the details (including a temporary download URL) of a
+     * previously uploaded media resource.
+     *
+     * @param mediaId the ID of the media resource to look up.
+     * @return a {@link CompletableFuture} that will complete with the media's
+     *         details once the request is successful.
+     * @throws IOException if an I/O error occurs during the request.
+     */
+    @Override
+    public CompletableFuture<MediaInfoResponse> getMedia(String mediaId) throws IOException {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                validateMediaId(mediaId);
+
+                final HttpGet httpGet = new HttpGet(String.format("%s/%s", whatsappApiUrl, mediaId));
+                httpGet.addHeader("Authorization", String.format("Bearer %s", token));
+
+                String responseBody = whatsAppService.sendRequest(httpGet);
+                return OBJECT_MAPPER.readValue(responseBody, MediaInfoResponse.class);
+            } catch (Exception ex) {
+                throw new CompletionException(ex);
+            }
+        });
+    }
+
+    /**
+     * Deletes a previously uploaded media resource from the server.
+     *
+     * @param mediaId the ID of the media resource to delete.
+     * @return a {@link CompletableFuture} that will complete with the deletion
+     *         result once the request is successful.
+     * @throws IOException if an I/O error occurs during the request.
+     */
+    @Override
+    public CompletableFuture<DeleteMediaResponse> deleteMedia(String mediaId) throws IOException {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                validateMediaId(mediaId);
+
+                final HttpDelete httpDelete = new HttpDelete(String.format("%s/%s", whatsappApiUrl, mediaId));
+                httpDelete.addHeader("Authorization", String.format("Bearer %s", token));
+
+                String responseBody = whatsAppService.sendRequest(httpDelete);
+                return OBJECT_MAPPER.readValue(responseBody, DeleteMediaResponse.class);
+            } catch (Exception ex) {
+                throw new CompletionException(ex);
+            }
+        });
+    }
+
+    /**
+     * Validates that a media ID was provided.
+     *
+     * @param mediaId the media ID to validate.
+     * @throws IllegalArgumentException if {@code mediaId} is {@code null} or
+     *                                  blank.
+     */
+    private void validateMediaId(String mediaId) {
+        if (mediaId == null || mediaId.isBlank()) {
+            throw new IllegalArgumentException("Media ID must not be null or blank.");
+        }
     }
 
     /**

@@ -39,6 +39,17 @@ Applies to **all** sending methods: must be non-null and contain only digits (no
 - The list must contain at least one `Contact`.
 - Each `Contact` requires a `name` with a non-empty `formattedName` (the only mandatory field of the `Contact` object; addresses, emails, phones, org, and urls are optional).
 
+## Templates
+
+| Rule | Value |
+|---|---|
+| `name` | required, non-blank |
+| `language` | required, with a non-blank `code` |
+| Text parameter in `header` | max. `TEMPLATE_HEADER_TEXT_MAX_LENGTH` (60) characters |
+| Text parameter in `body`/`button` | max. `TEMPLATE_BODY_TEXT_MAX_LENGTH` (1024) characters |
+
+How many parameters the template already registered with Meta actually expects is not validated — see [Templates](04-templates.md).
+
 ## Interactive — buttons
 
 | Rule | Value |

@@ -87,6 +87,18 @@ public final class WhatsAppConstants {
     public static final double LOCATION_MAX_LONGITUDE = 180;
 
     /**
+     * The maximum length (in characters) for a text parameter in a template's
+     * header component.
+     */
+    public static final int TEMPLATE_HEADER_TEXT_MAX_LENGTH = 60;
+
+    /**
+     * The maximum length (in characters) for a text parameter in a template's
+     * body or button component.
+     */
+    public static final int TEMPLATE_BODY_TEXT_MAX_LENGTH = 1024;
+
+    /**
      * Private constructor to prevent instantiation of this utility class.
      */
     private WhatsAppConstants() {

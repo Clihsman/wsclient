@@ -15,6 +15,7 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.http.ParseException;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -167,6 +168,29 @@ public class WhatsAppServiceImpl implements WhatsAppService {
                 .build()) {
 
             try (CloseableHttpResponse response = httpClient.execute(HttpGet)) {
+
+                HttpEntity responseEntity = response.getEntity();
+
+                if (responseEntity == null) {
+                    throw new IOException("No response received from the server.");
+                }
+
+                throwIfErrorResponse(response);
+
+                String body = EntityUtils.toString(responseEntity);
+                EntityUtils.consume(responseEntity);
+
+                return body;
+            }
+        }
+    }
+
+    @Override
+    public String sendRequest(HttpDelete httpDelete) throws IOException, WhatsAppException {
+        try (CloseableHttpClient httpClient = HttpClientBuilder.create()
+                .build()) {
+
+            try (CloseableHttpResponse response = httpClient.execute(httpDelete)) {
 
                 HttpEntity responseEntity = response.getEntity();
 

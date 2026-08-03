@@ -19,16 +19,22 @@ import com.wsclient.api.webhook.FBAccessToken;
 
 public class FacebookAuthServiceImpl implements FacebookAuthService {
 
-    private static final String GRAPH_API_URL = "https://graph.facebook.com/oauth/access_token";
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
             .setPropertyNamingStrategy(PropertyNamingStrategies.SNAKE_CASE)
             .setSerializationInclusion(JsonInclude.Include.NON_NULL);
+
+    private String graphApiUrl = "https://graph.facebook.com/oauth/access_token";
+
+    @Override
+    public void configure(String graphApiUrl) {
+        this.graphApiUrl = graphApiUrl;
+    }
 
     @Override
     public CompletableFuture<FBAccessToken> getAppAccessToken(String clientId, String clientSecret) {
         return CompletableFuture.supplyAsync(() -> {
             String url = String.format("%s?client_id=%s&client_secret=%s&grant_type=client_credentials",
-                    GRAPH_API_URL, clientId, clientSecret);
+                    graphApiUrl, clientId, clientSecret);
 
             try (CloseableHttpClient httpClient = HttpClients.createDefault();
                     CloseableHttpResponse response = httpClient.execute(new HttpGet(url))) {

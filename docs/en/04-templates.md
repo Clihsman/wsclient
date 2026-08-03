@@ -20,7 +20,7 @@ client.sendTemplate("573001112233", template).join();
 
 Each call to `bodyText`/`headerText`/etc. appends a parameter to the corresponding component's list (`header`, `body`, or `button`) — it does not create a new component per call. Components are always assembled in the order `header`, `body`, `button`, regardless of the order you called the methods, and a component only appears in the final `Template` if you added at least one parameter to it.
 
-`sendTemplate` **does not go through `WhatsAppInputValidator`** (there is no upfront field validation); any formatting error will be reported directly by the Meta API as a `WhatsAppException`.
+`sendTemplate` validates `to`, the template's `name`/`language`, and the length of text parameters per component (60 characters in `header`, 1024 in `body`/`button`) before calling the API — see [Limits and validation](09-limits-and-validation.md). It does not validate how many parameters the template registered with Meta actually expects, or any other template-specific rule; those errors are reported by the API as a `WhatsAppException`.
 
 > **Known limitation:** `buttonText(...)` appends parameters to a single `BUTTON` component. The `Component` model has no `sub_type` or `index`, so this factory cannot target a specific button when a template has more than one.
 

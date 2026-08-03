@@ -9,9 +9,14 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.wsclient.api.messages.request.Component;
+import com.wsclient.api.messages.request.Component.ComponentType;
 import com.wsclient.api.messages.request.Location;
 import com.wsclient.api.messages.request.Media;
+import com.wsclient.api.messages.request.Parameter;
+import com.wsclient.api.messages.request.Parameter.ParameterType;
 import com.wsclient.api.messages.request.Reaction;
+import com.wsclient.api.messages.request.Template;
 import com.wsclient.api.messages.request.Text;
 import com.wsclient.api.messages.request.contact.Contact;
 import com.wsclient.api.messages.request.interactive.Interactive;
@@ -848,6 +853,83 @@ public final class WhatsAppInputValidator {
             if (contact.name() == null || contact.name().formattedName() == null
                     || contact.name().formattedName().isBlank()) {
                 return new IllegalArgumentException("Each contact must have a name with a non-empty formatted_name.");
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Validates the input parameters for sending a WhatsApp template message.
+     *
+     * <p>
+     * This performs structural validation only (recipient, required fields,
+     * text length limits per component). It cannot validate values that depend
+     * on the template's actual definition as registered with Meta (e.g. how
+     * many parameters a given template expects).
+     * </p>
+     *
+     * @param to       The recipient's phone number in international format.
+     *                 It must contain only digits (e.g., "573001112233").
+     * @param template The {@link Template} object containing the template name,
+     *                 language, and components.
+     * @return An {@link IllegalArgumentException} if any validation fails;
+     *         otherwise, returns {@code null}.
+     */
+    public static IllegalArgumentException validateTemplateInput(String to, Template template) {
+
+        if (Objects.isNull(to)) {
+            return new IllegalArgumentException("Recipient number cannot be null.");
+        }
+
+        if (!to.matches("\\d+")) {
+            return new IllegalArgumentException("Invalid recipient number. The 'to' field must contain only digits.");
+        }
+
+        if (Objects.isNull(template)) {
+            return new IllegalArgumentException("Template object cannot be null.");
+        }
+
+        if (template.getName() == null || template.getName().isBlank()) {
+            return new IllegalArgumentException("Template name cannot be null or empty.");
+        }
+
+        if (template.getLanguage() == null) {
+            return new IllegalArgumentException("Template language cannot be null.");
+        }
+
+        if (template.getLanguage().getCode() == null || template.getLanguage().getCode().isBlank()) {
+            return new IllegalArgumentException("Template language code cannot be null or empty.");
+        }
+
+        if (template.getComponents() == null) {
+            return null;
+        }
+
+        for (Component component : template.getComponents()) {
+            if (component == null) {
+                return new IllegalArgumentException("Template component cannot be null.");
+            }
+
+            if (component.getType() == null) {
+                return new IllegalArgumentException("Template component type cannot be null.");
+            }
+
+            if (component.getParameters() == null) {
+                continue;
+            }
+
+            final int maxTextLength = component.getType() == ComponentType.HEADER
+                    ? TEMPLATE_HEADER_TEXT_MAX_LENGTH
+                    : TEMPLATE_BODY_TEXT_MAX_LENGTH;
+
+            for (Parameter parameter : component.getParameters()) {
+                if (parameter != null && parameter.getType() == ParameterType.TEXT
+                        && parameter.getText() != null && parameter.getText().length() > maxTextLength) {
+                    return new IllegalArgumentException(
+                            String.format("Text parameter exceeds maximum length of %d characters for %s component.",
+                                    maxTextLength, component.getType().getValue()));
+                }
             }
         }
 
