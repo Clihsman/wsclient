@@ -54,13 +54,11 @@ Aplica a **todos** los métodos de envío: debe ser no nulo y contener solo díg
 |---|---|
 | `body.text` | requerido |
 | Texto del botón de la lista | requerido, máx. 20 caracteres |
-| Cantidad de secciones | 1 a 10 |
-| Título de sección | requerido, máx. 24 caracteres |
-| Filas por sección | 1 a 10 |
+| Cantidad de secciones | `INTERACTIVE_MIN_SECTIONS` (1) a `INTERACTIVE_MAX_SECTIONS` (10) |
+| Título de sección | requerido, máx. `INTERACTIVE_MAX_SECTION_TITLE_LENGTH` (24) caracteres |
+| Filas por sección | `INTERACTIVE_MIN_LIST_ROWS` (1) a `INTERACTIVE_MAX_LIST_ROWS` (10) |
 | `id` de fila | requerido, máx. 200 caracteres, **único en todo el mensaje** (no solo en la sección) |
-| `title` de fila | requerido, máx. 24 caracteres |
-| `description` de fila | opcional, máx. 72 caracteres |
-
-> `WhatsAppConstants` también declara `INTERACTIVE_MIN_LIST_ROWS`, `INTERACTIVE_MAX_LIST_ROWS`, `INTERACTIVE_MAX_ROW_TITLE_LENGTH` e `INTERACTIVE_MAX_ROW_DESCRIPTION_LENGTH` con estos mismos valores, pero el validador de listas actualmente compara contra literales (`10`, `24`, `72`) en vez de esas constantes — los valores coinciden hoy, pero si cambias una constante no cambiará el comportamiento real hasta que el validador se actualice para usarla.
+| `title` de fila | requerido, máx. `INTERACTIVE_MAX_ROW_TITLE_LENGTH` (24) caracteres |
+| `description` de fila | opcional, máx. `INTERACTIVE_MAX_ROW_DESCRIPTION_LENGTH` (72) caracteres |
 
 Estos tipos de interactivo se construyen con `InteractiveFactory` — ver [Mensajes interactivos](03-interactive-messages.md).

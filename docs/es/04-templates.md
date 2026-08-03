@@ -2,49 +2,60 @@
 
 ## Enviar un mensaje de plantilla
 
-Un `Template` (`com.wsclient.api.messages.request.Template`) requiere `name` y `language`, y opcionalmente una lista de `components` (header/body/button) con sus `parameters`.
+La forma recomendada de construir un `Template` es `TemplateFactory` (`com.wsclient.api.messages.factory.TemplateFactory`), un builder fluido análogo a `InteractiveFactory` (ver [Mensajes interactivos](03-interactive-messages.md)):
 
 ```java
-import com.wsclient.api.messages.request.*;
+import com.wsclient.api.messages.factory.TemplateFactory;
+import com.wsclient.api.messages.request.Template;
 
-Template template = Template.builder()
-        .name("order_confirmation")
-        .language(Language.builder().code("es_CO").build()) // "policy" es opcional; Meta usa "deterministic" si se omite
-        .components(List.of(
-                // Parámetro de texto en el body
-                Component.builder()
-                        .type(Component.ComponentType.BODY)
-                        .parameters(Parameter.builder()
-                                .type(Parameter.ParameterType.TEXT)
-                                .text("Juan Pérez")
-                                .build())
-                        .build(),
-                // Botón de tipo quick_reply / url con payload dinámico
-                Component.builder()
-                        .type(Component.ComponentType.BUTTON)
-                        .parameters(Parameter.builder()
-                                .type(Parameter.ParameterType.TEXT)
-                                .text("order-123")
-                                .build())
-                        .build()))
+Template template = TemplateFactory.create("order_confirmation", "es_CO")
+        .headerText("Pedido confirmado")
+        .bodyText("Juan Pérez")   // primer parámetro del body
+        .bodyText("order-123")   // segundo parámetro del mismo body
+        .buttonText("order-123") // parámetro dinámico del botón
         .build();
 
 client.sendTemplate("573001112233", template).join();
 ```
 
+Cada llamada a `bodyText`/`headerText`/etc. agrega un parámetro a la lista del componente correspondiente (`header`, `body` o `button`) — no crea un componente nuevo por cada llamada. Los componentes se ensamblan siempre en el orden `header`, `body`, `button`, sin importar en qué orden los hayas llamado, y un componente solo aparece en el `Template` final si le agregaste al menos un parámetro.
+
 `sendTemplate` **no pasa por `WhatsAppInputValidator`** (no hay validación de campos previa); cualquier error de formato lo reportará directamente la API de Meta como un `WhatsAppException`.
 
-> **Limitación actual:** `Component.parameters` es un único `Parameter`, no una lista. Si tu plantilla necesita varios parámetros en el mismo componente (por ejemplo, dos variables de texto en el body), tendrás que enviar un `Component` por cada parámetro repitiendo el mismo `type`.
+> **Limitación conocida:** `buttonText(...)` agrega parámetros a un único componente `BUTTON`. El modelo `Component` no tiene `sub_type` ni `index`, así que esta factory no puede dirigir un parámetro a un botón específico cuando la plantilla tiene más de uno.
 
-### Parámetros disponibles (`Parameter.ParameterType`)
+### Parámetros disponibles
 
-| Tipo | Campo a usar | Notas |
-|---|---|---|
-| `TEXT` | `text` | Máx. 60 caracteres en header, 1024 en body (32768 si el template solo tiene body). |
-| `CURRENCY` | `currency` | `Currency(fallbackValue, code, amount1000)` — código ISO 4217, monto multiplicado por 1000. |
-| `DATETIME` | `dateTime` | `DateTime` con `fallbackValue` y campos opcionales (`dayOfWeek`, `yaer` — *typo existente en el campo, no `year`*, `month`, `dayOfMonth`, `hour`, `minute`, `calendar`). |
-| `IMAGE` | `image` | Un `Media` (`id` o `link`), para headers de imagen. |
-| `DOCUMENT` | `document` | Un `Media`, solo PDF para templates media-based. |
+Cada tipo de contenido tiene su método en `TemplateFactory` (`headerText`/`bodyText`/`buttonText`, `headerCurrency`/`bodyCurrency`, `headerDateTime`/`bodyDateTime`, `headerImage`/`bodyImage`, `headerDocument`/`bodyDocument`):
+
+| Tipo | Notas |
+|---|---|
+| Texto | Máx. 60 caracteres en header, 1024 en body (32768 si el template solo tiene body). |
+| Moneda (`Currency`) | `Currency(fallbackValue, code, amount1000)` — código ISO 4217, monto multiplicado por 1000. |
+| Fecha/hora (`DateTime`) | `fallbackValue` requerido; campos opcionales: `dayOfWeek`, `year`, `month`, `dayOfMonth`, `hour`, `minute`, `calendar`. |
+| Imagen (`Media`) | `id` o `link`, para headers de imagen. |
+| Documento (`Media`) | `id` o `link`, solo PDF para templates media-based. |
+
+### Construcción manual (sin el factory)
+
+```java
+import com.wsclient.api.messages.request.*;
+import java.util.List;
+
+Template template = Template.builder()
+        .name("order_confirmation")
+        .language(Language.builder().code("es_CO").build()) // "policy" es opcional; Meta usa "deterministic" si se omite
+        .components(List.of(
+                Component.builder()
+                        .type(Component.ComponentType.BODY)
+                        .parameters(List.of(
+                                Parameter.builder().type(Parameter.ParameterType.TEXT).text("Juan Pérez").build(),
+                                Parameter.builder().type(Parameter.ParameterType.TEXT).text("order-123").build()))
+                        .build()))
+        .build();
+```
+
+`Component.parameters` es siempre una lista — la API de WhatsApp espera un array incluso cuando el componente solo tiene un parámetro.
 
 ## Listar plantillas disponibles
 

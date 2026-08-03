@@ -54,13 +54,11 @@ Applies to **all** sending methods: must be non-null and contain only digits (no
 |---|---|
 | `body.text` | required |
 | List button text | required, max. 20 characters |
-| Number of sections | 1 to 10 |
-| Section title | required, max. 24 characters |
-| Rows per section | 1 to 10 |
+| Number of sections | `INTERACTIVE_MIN_SECTIONS` (1) to `INTERACTIVE_MAX_SECTIONS` (10) |
+| Section title | required, max. `INTERACTIVE_MAX_SECTION_TITLE_LENGTH` (24) characters |
+| Rows per section | `INTERACTIVE_MIN_LIST_ROWS` (1) to `INTERACTIVE_MAX_LIST_ROWS` (10) |
 | Row `id` | required, max. 200 characters, **unique across the whole message** (not just within the section) |
-| Row `title` | required, max. 24 characters |
-| Row `description` | optional, max. 72 characters |
-
-> `WhatsAppConstants` also declares `INTERACTIVE_MIN_LIST_ROWS`, `INTERACTIVE_MAX_LIST_ROWS`, `INTERACTIVE_MAX_ROW_TITLE_LENGTH`, and `INTERACTIVE_MAX_ROW_DESCRIPTION_LENGTH` with these same values, but the list validator currently compares against literals (`10`, `24`, `72`) instead of those constants — the values match today, but changing a constant won't change actual behavior until the validator is updated to use it.
+| Row `title` | required, max. `INTERACTIVE_MAX_ROW_TITLE_LENGTH` (24) characters |
+| Row `description` | optional, max. `INTERACTIVE_MAX_ROW_DESCRIPTION_LENGTH` (72) characters |
 
 These interactive types are built with `InteractiveFactory` — see [Interactive messages](03-interactive-messages.md).

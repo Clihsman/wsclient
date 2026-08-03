@@ -415,12 +415,13 @@ public final class WhatsAppInputValidator {
      */
     private static IllegalArgumentException validateSectionList(List<InteractiveSection> interactiveSections) {
 
-        if (interactiveSections == null || interactiveSections.isEmpty()) {
+        if (interactiveSections == null || interactiveSections.size() < INTERACTIVE_MIN_SECTIONS) {
             return new IllegalArgumentException("List interactive must contain at least one section.");
         }
 
-        if (interactiveSections.size() > 10) {
-            return new IllegalArgumentException("You can include up to 10 sections maximum.");
+        if (interactiveSections.size() > INTERACTIVE_MAX_SECTIONS) {
+            return new IllegalArgumentException(
+                    String.format("You can include up to %d sections maximum.", INTERACTIVE_MAX_SECTIONS));
         }
 
         IllegalArgumentException duplicateError = validateDuplicateRowIds(interactiveSections);
@@ -434,18 +435,21 @@ public final class WhatsAppInputValidator {
                 return new IllegalArgumentException("Each section must have a title.");
             }
 
-            if (section.getTitle().length() > 24) {
-                return new IllegalArgumentException("Section title cannot exceed 24 characters.");
+            if (section.getTitle().length() > INTERACTIVE_MAX_SECTION_TITLE_LENGTH) {
+                return new IllegalArgumentException(
+                        String.format("Section title cannot exceed %d characters.",
+                                INTERACTIVE_MAX_SECTION_TITLE_LENGTH));
             }
 
             List<InteractiveSectionRow> rows = section.getRows();
 
-            if (rows == null || rows.isEmpty()) {
+            if (rows == null || rows.size() < INTERACTIVE_MIN_LIST_ROWS) {
                 return new IllegalArgumentException("Each section must contain at least one row.");
             }
 
-            if (rows.size() > 10) {
-                return new IllegalArgumentException("Each section can contain up to 10 rows maximum.");
+            if (rows.size() > INTERACTIVE_MAX_LIST_ROWS) {
+                return new IllegalArgumentException(
+                        String.format("Each section can contain up to %d rows maximum.", INTERACTIVE_MAX_LIST_ROWS));
             }
 
             for (InteractiveSectionRow row : rows) {
@@ -461,12 +465,16 @@ public final class WhatsAppInputValidator {
                     return new IllegalArgumentException("Each row must have a title.");
                 }
 
-                if (row.getTitle().length() > 24) {
-                    return new IllegalArgumentException("Row title cannot exceed 24 characters.");
+                if (row.getTitle().length() > INTERACTIVE_MAX_ROW_TITLE_LENGTH) {
+                    return new IllegalArgumentException(
+                            String.format("Row title cannot exceed %d characters.", INTERACTIVE_MAX_ROW_TITLE_LENGTH));
                 }
 
-                if (row.getDescription() != null && row.getDescription().length() > 72) {
-                    return new IllegalArgumentException("Row description cannot exceed 72 characters.");
+                if (row.getDescription() != null
+                        && row.getDescription().length() > INTERACTIVE_MAX_ROW_DESCRIPTION_LENGTH) {
+                    return new IllegalArgumentException(
+                            String.format("Row description cannot exceed %d characters.",
+                                    INTERACTIVE_MAX_ROW_DESCRIPTION_LENGTH));
                 }
             }
         }
@@ -637,7 +645,7 @@ public final class WhatsAppInputValidator {
             return exceptionValidateMedia;
 
         if (audio.getFilename() != null && !audio.getFilename().isBlank()) {
-            return new IllegalArgumentException("Filename is not allowed for video messages.");
+            return new IllegalArgumentException("Filename is not allowed for audio messages.");
         }
 
         return null;

@@ -742,7 +742,7 @@ public class WhatsAppClientTest {
                                 () -> whatsAppClient.sendAudioAsync("573001112233", video).join());
 
                 assertTrue(ex.getCause() instanceof IllegalArgumentException);
-                assertEquals("Filename is not allowed for video messages.", ex.getCause().getMessage());
+                assertEquals("Filename is not allowed for audio messages.", ex.getCause().getMessage());
         }
 
         @Test

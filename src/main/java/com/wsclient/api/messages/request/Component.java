@@ -1,5 +1,7 @@
 package com.wsclient.api.messages.request;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonValue;
 
 import lombok.AllArgsConstructor;
@@ -32,12 +34,14 @@ public class Component {
      */
     private ComponentType type;
     /**
-     * <strong>Required when type is</strong> <code>button</code>.
+     * <strong>Required</strong> when the component carries dynamic values.
      * <p>
-     * The namespace of the template.
+     * The array of parameters that fill in the placeholders of this component.
+     * The WhatsApp Cloud API always expects this as a JSON array, even for a
+     * single parameter.
      * </p>
      */
-    private Parameter parameters;
+    private List<Parameter> parameters;
 
     /**
      * ComponentType

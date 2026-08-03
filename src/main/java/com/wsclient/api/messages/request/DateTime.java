@@ -45,7 +45,7 @@ public class DateTime {
      * Specifies the year.
      * </p>
      */
-    private Integer yaer;
+    private Integer year;
     /**
      * <strong>
      * Optional.

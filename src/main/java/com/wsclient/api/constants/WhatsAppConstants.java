@@ -40,6 +40,22 @@ public final class WhatsAppConstants {
     public static final int INTERACTIVE_MIN_LIST_ROWS = 1;
 
     /**
+     * The maximum number of sections allowed in an interactive list message.
+     */
+    public static final int INTERACTIVE_MAX_SECTIONS = 10;
+
+    /**
+     * The minimum number of sections required in an interactive list message.
+     */
+    public static final int INTERACTIVE_MIN_SECTIONS = 1;
+
+    /**
+     * The maximum length (in characters) for the title of a section in a list
+     * message.
+     */
+    public static final int INTERACTIVE_MAX_SECTION_TITLE_LENGTH = 24;
+
+    /**
      * The maximum length (in characters) for the title of a row in a list message.
      */
     public static final int INTERACTIVE_MAX_ROW_TITLE_LENGTH = 24;
