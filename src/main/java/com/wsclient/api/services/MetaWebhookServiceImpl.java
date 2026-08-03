@@ -1,8 +1,10 @@
 package com.wsclient.api.services;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -65,8 +67,8 @@ public class MetaWebhookServiceImpl implements MetaWebhookService {
                     return responseBody;
                 }
 
-            } catch (Exception e) {
-                throw new RuntimeException("Error al registrar el webhook: " + e.getMessage(), e);
+            } catch (IOException | WhatsAppException e) {
+                throw new CompletionException("Failed to register webhook subscription", e);
             }
         });
     }

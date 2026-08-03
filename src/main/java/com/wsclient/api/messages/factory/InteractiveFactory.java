@@ -157,25 +157,14 @@ public class InteractiveFactory {
     /**
      * Builds and returns a fully configured {@link Interactive} object.
      * <p>
-     * Performs basic consistency validation before returning the final object.
+     * This method does not validate the resulting object. Field-level validation
+     * (required type, minimum buttons/sections, length limits, duplicate IDs,
+     * etc.) is performed by {@link com.wsclient.api.validators.WhatsAppInputValidator}
+     * when the message is sent via {@link com.wsclient.api.services.WhatsAppClient}.
      *
      * @return the constructed {@link Interactive} message
-     * @throws IllegalStateException if the configuration is invalid
      */
     public Interactive build() {
-
-      // if (type == null) {
-      //     throw new IllegalStateException("Interactive type must be defined.");
-      // }
-
-      // if (type == InteractiveType.LIST && (sections == null || sections.isEmpty())) {
-      //     throw new IllegalStateException("List interactive must contain at least one section.");
-      // }
-
-      // if (type == InteractiveType.BUTTON && (buttons == null || buttons.isEmpty())) {
-      //     throw new IllegalStateException("Button interactive must contain at least one button.");
-      // }
-
         return Interactive.builder()
                 .type(type)
                 .body(InteractiveBody.builder()
