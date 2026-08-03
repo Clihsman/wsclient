@@ -3,7 +3,6 @@ package com.wsclient;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -18,6 +17,7 @@ import com.sun.net.httpserver.HttpServer;
 import com.wsclient.api.services.FacebookAuthService;
 import com.wsclient.api.services.FacebookAuthServiceImpl;
 import com.wsclient.api.webhook.FBAccessToken;
+import com.wsclient.core.exceptions.WhatsAppException;
 
 /**
  * These tests exercise {@link FacebookAuthServiceImpl} against a local
@@ -64,8 +64,10 @@ public class FacebookAuthServiceImplTest {
     }
 
     @Test
-    void getAppAccessToken_ShouldThrow_WhenApiReturnsError() throws Exception {
-        String baseUrl = startServer(400, "{\"error\":{\"message\":\"Invalid client secret\"}}");
+    void getAppAccessToken_ShouldThrowWhatsAppException_WhenApiReturnsError() throws Exception {
+        String errorJson = "{\"error\":{\"message\":\"Invalid client secret\",\"type\":\"OAuthException\","
+                + "\"code\":190,\"error_subcode\":0,\"fbtrace_id\":\"trace-2\"}}";
+        String baseUrl = startServer(400, errorJson);
 
         FacebookAuthService authService = new FacebookAuthServiceImpl();
         authService.configure(baseUrl);
@@ -73,14 +75,25 @@ public class FacebookAuthServiceImplTest {
         CompletionException exception = assertThrows(CompletionException.class,
                 () -> authService.getAppAccessToken("client-id", "wrong-secret").join());
 
-        // Note: unlike the rest of the library, FacebookAuthServiceImpl currently
-        // wraps API errors in a generic RuntimeException rather than
-        // WhatsAppException. This test documents that existing behavior: the
-        // outer CompletionException's cause is itself a CompletionException
-        // wrapping the actual RuntimeException with the error details.
-        Throwable innerCompletion = exception.getCause();
-        assertInstanceOf(CompletionException.class, innerCompletion);
-        assertInstanceOf(RuntimeException.class, innerCompletion.getCause());
-        assertTrue(innerCompletion.getCause().getMessage().contains("Failed to get access token"));
+        Throwable cause = exception.getCause();
+        assertInstanceOf(WhatsAppException.class, cause);
+        WhatsAppException whatsAppException = (WhatsAppException) cause;
+        assertEquals("Invalid client secret", whatsAppException.getMessage());
+        assertEquals("OAuthException", whatsAppException.getType());
+        assertEquals(190, whatsAppException.getCode());
+        assertEquals("trace-2", whatsAppException.getFbtraceId());
+    }
+
+    @Test
+    void getAppAccessToken_ShouldThrowWhatsAppException_WhenErrorResponseIsNotJson() throws Exception {
+        String baseUrl = startServer(500, "Internal Server Error");
+
+        FacebookAuthService authService = new FacebookAuthServiceImpl();
+        authService.configure(baseUrl);
+
+        CompletionException exception = assertThrows(CompletionException.class,
+                () -> authService.getAppAccessToken("client-id", "wrong-secret").join());
+
+        assertInstanceOf(WhatsAppException.class, exception.getCause());
     }
 }
