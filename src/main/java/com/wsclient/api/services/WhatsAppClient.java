@@ -2,11 +2,16 @@ package com.wsclient.api.services;
 
 import java.util.concurrent.CompletableFuture;
 
+import java.util.List;
+
 import com.wsclient.api.business.request.BusinessProfile;
 import com.wsclient.api.business.response.BusinessProfileResponse;
+import com.wsclient.api.messages.request.Location;
 import com.wsclient.api.messages.request.Media;
+import com.wsclient.api.messages.request.Reaction;
 import com.wsclient.api.messages.request.Template;
 import com.wsclient.api.messages.request.Text;
+import com.wsclient.api.messages.request.contact.Contact;
 import com.wsclient.api.messages.request.interactive.Interactive;
 import com.wsclient.api.messages.response.WhatsAppResponse;
 
@@ -150,6 +155,68 @@ public interface WhatsAppClient {
          *         containing the API response.
          */
         public CompletableFuture<WhatsAppResponse> sendDocumentAsync(String to, Media document);
+
+        /**
+         * Sends a WhatsApp sticker message to a specified recipient.
+         *
+         * <p>
+         * The {@link Media} object must include either a valid {@code id} or a valid
+         * {@code link}. Unlike other media types, sticker messages do not support a
+         * {@code caption} or a {@code filename}.
+         * </p>
+         *
+         * @param to      The recipient's phone number in international format.
+         * @param sticker The sticker media object containing the sticker's URL or ID.
+         * @return A {@link CompletableFuture} that resolves to a
+         *         {@link WhatsAppResponse} containing the API response.
+         * @throws IllegalArgumentException if validation of the recipient or sticker
+         *                                   media fails.
+         */
+        public CompletableFuture<WhatsAppResponse> sendStickerAsync(String to, Media sticker);
+
+        /**
+         * Sends a WhatsApp location message to a specified recipient.
+         *
+         * @param to       The recipient's phone number in international format.
+         * @param location The location object containing latitude, longitude, and
+         *                 optional name/address.
+         * @return A {@link CompletableFuture} that resolves to a
+         *         {@link WhatsAppResponse} containing the API response.
+         * @throws IllegalArgumentException if validation of the recipient or
+         *                                   location fails.
+         */
+        public CompletableFuture<WhatsAppResponse> sendLocationAsync(String to, Location location);
+
+        /**
+         * Sends a WhatsApp reaction message to a specified recipient.
+         * <p>
+         * The reaction targets a previously sent or received message via its
+         * WhatsApp message ID. Sending an empty emoji ({@code ""}) removes a
+         * previously sent reaction.
+         * </p>
+         *
+         * @param to       The recipient's phone number in international format.
+         * @param reaction The reaction object containing the target message ID and
+         *                 emoji.
+         * @return A {@link CompletableFuture} that resolves to a
+         *         {@link WhatsAppResponse} containing the API response.
+         * @throws IllegalArgumentException if validation of the recipient or
+         *                                   reaction fails.
+         */
+        public CompletableFuture<WhatsAppResponse> sendReactionAsync(String to, Reaction reaction);
+
+        /**
+         * Sends a WhatsApp contacts message to a specified recipient.
+         *
+         * @param to       The recipient's phone number in international format.
+         * @param contacts The list of contacts to send. Must contain at least one
+         *                 contact, each with a required {@code name}.
+         * @return A {@link CompletableFuture} that resolves to a
+         *         {@link WhatsAppResponse} containing the API response.
+         * @throws IllegalArgumentException if validation of the recipient or
+         *                                   contacts fails.
+         */
+        public CompletableFuture<WhatsAppResponse> sendContactsAsync(String to, List<Contact> contacts);
 
         /**
          * Sends a WhatsApp interactive message to a specified recipient.

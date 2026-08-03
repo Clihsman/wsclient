@@ -169,7 +169,7 @@ public class Interactive {
         /**
          * PRODUCT_LIST
          */
-        PRODUCT_LIST("product");
+        PRODUCT_LIST("product_list");
 
         private final String value;
 

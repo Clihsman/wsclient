@@ -9,8 +9,11 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.wsclient.api.messages.request.Location;
 import com.wsclient.api.messages.request.Media;
+import com.wsclient.api.messages.request.Reaction;
 import com.wsclient.api.messages.request.Text;
+import com.wsclient.api.messages.request.contact.Contact;
 import com.wsclient.api.messages.request.interactive.Interactive;
 import com.wsclient.api.messages.request.interactive.InteractiveButton;
 import com.wsclient.api.messages.request.interactive.InteractiveButtonReply;
@@ -664,6 +667,180 @@ public final class WhatsAppInputValidator {
 
         if (document.getFilename().length() > 240) {
             return new IllegalArgumentException("Filename exceeds maximum length of 240 characters.");
+        }
+
+        return null;
+    }
+
+    /**
+     * Validates the input parameters for sending a WhatsApp sticker message.
+     *
+     * <p>
+     * Stickers follow the same {@code id}/{@code link} rules as other media
+     * types, but unlike image/video/document they do not support a
+     * {@code caption} or {@code filename}.
+     * </p>
+     *
+     * @param to      The recipient's phone number in international format.
+     *                It must contain only digits (e.g., "573001112233").
+     * @param sticker The {@link Media} object containing the sticker information.
+     *                It must include either a valid {@code id} or a valid
+     *                {@code link}, and must not include a {@code caption} or
+     *                {@code filename}.
+     * @return An {@link IllegalArgumentException} if any validation fails;
+     *         otherwise, returns {@code null}.
+     */
+    public static IllegalArgumentException validateStickerInput(String to, Media sticker) {
+
+        IllegalArgumentException exceptionValidateMedia = validateMediaInput(to, sticker);
+
+        if (exceptionValidateMedia != null)
+            return exceptionValidateMedia;
+
+        if (sticker.getFilename() != null && !sticker.getFilename().isBlank()) {
+            return new IllegalArgumentException("Filename is not allowed for sticker messages.");
+        }
+
+        if (sticker.getCaption() != null && !sticker.getCaption().isBlank()) {
+            return new IllegalArgumentException("Caption is not allowed for sticker messages.");
+        }
+
+        return null;
+    }
+
+    /**
+     * Validates the input parameters for sending a WhatsApp location message.
+     *
+     * @param to       The recipient's phone number in international format.
+     *                 It must contain only digits (e.g., "573001112233").
+     * @param location The {@link Location} object containing the latitude and
+     *                 longitude to send.
+     * @return An {@link IllegalArgumentException} if any validation fails;
+     *         otherwise, returns {@code null}.
+     */
+    public static IllegalArgumentException validateLocationInput(String to, Location location) {
+
+        if (Objects.isNull(to)) {
+            return new IllegalArgumentException("Recipient number cannot be null.");
+        }
+
+        if (!to.matches("\\d+")) {
+            return new IllegalArgumentException("Invalid recipient number. The 'to' field must contain only digits.");
+        }
+
+        if (Objects.isNull(location)) {
+            return new IllegalArgumentException("Location object cannot be null.");
+        }
+
+        if (location.getLatitude() == null || location.getLatitude().isBlank()) {
+            return new IllegalArgumentException("Location latitude cannot be null or empty.");
+        }
+
+        if (location.getLongitude() == null || location.getLongitude().isBlank()) {
+            return new IllegalArgumentException("Location longitude cannot be null or empty.");
+        }
+
+        final double latitude;
+        final double longitude;
+
+        try {
+            latitude = Double.parseDouble(location.getLatitude());
+        } catch (NumberFormatException e) {
+            return new IllegalArgumentException("Location latitude must be a valid number.");
+        }
+
+        try {
+            longitude = Double.parseDouble(location.getLongitude());
+        } catch (NumberFormatException e) {
+            return new IllegalArgumentException("Location longitude must be a valid number.");
+        }
+
+        if (latitude < LOCATION_MIN_LATITUDE || latitude > LOCATION_MAX_LATITUDE) {
+            return new IllegalArgumentException(
+                    String.format("Location latitude must be between %s and %s.",
+                            LOCATION_MIN_LATITUDE, LOCATION_MAX_LATITUDE));
+        }
+
+        if (longitude < LOCATION_MIN_LONGITUDE || longitude > LOCATION_MAX_LONGITUDE) {
+            return new IllegalArgumentException(
+                    String.format("Location longitude must be between %s and %s.",
+                            LOCATION_MIN_LONGITUDE, LOCATION_MAX_LONGITUDE));
+        }
+
+        return null;
+    }
+
+    /**
+     * Validates the input parameters for sending a WhatsApp reaction message.
+     *
+     * @param to       The recipient's phone number in international format.
+     *                 It must contain only digits (e.g., "573001112233").
+     * @param reaction The {@link Reaction} object containing the target message
+     *                 ID and emoji. An empty emoji ({@code ""}) is valid and
+     *                 removes a previously sent reaction.
+     * @return An {@link IllegalArgumentException} if any validation fails;
+     *         otherwise, returns {@code null}.
+     */
+    public static IllegalArgumentException validateReactionInput(String to, Reaction reaction) {
+
+        if (Objects.isNull(to)) {
+            return new IllegalArgumentException("Recipient number cannot be null.");
+        }
+
+        if (!to.matches("\\d+")) {
+            return new IllegalArgumentException("Invalid recipient number. The 'to' field must contain only digits.");
+        }
+
+        if (Objects.isNull(reaction)) {
+            return new IllegalArgumentException("Reaction object cannot be null.");
+        }
+
+        if (reaction.getMessage_id() == null || reaction.getMessage_id().isBlank()) {
+            return new IllegalArgumentException("Reaction message ID cannot be null or empty.");
+        }
+
+        if (reaction.getEmoji() == null) {
+            return new IllegalArgumentException(
+                    "Reaction emoji cannot be null. Use an empty string to remove a reaction.");
+        }
+
+        return null;
+    }
+
+    /**
+     * Validates the input parameters for sending a WhatsApp contacts message.
+     *
+     * @param to       The recipient's phone number in international format.
+     *                 It must contain only digits (e.g., "573001112233").
+     * @param contacts The list of {@link Contact} objects to send. Must contain
+     *                 at least one contact, and each contact must include a
+     *                 {@code name} with a non-empty {@code formatted_name}.
+     * @return An {@link IllegalArgumentException} if any validation fails;
+     *         otherwise, returns {@code null}.
+     */
+    public static IllegalArgumentException validateContactsInput(String to, List<Contact> contacts) {
+
+        if (Objects.isNull(to)) {
+            return new IllegalArgumentException("Recipient number cannot be null.");
+        }
+
+        if (!to.matches("\\d+")) {
+            return new IllegalArgumentException("Invalid recipient number. The 'to' field must contain only digits.");
+        }
+
+        if (contacts == null || contacts.isEmpty()) {
+            return new IllegalArgumentException("Contacts message must contain at least one contact.");
+        }
+
+        for (Contact contact : contacts) {
+            if (contact == null) {
+                return new IllegalArgumentException("Contact cannot be null.");
+            }
+
+            if (contact.name() == null || contact.name().formattedName() == null
+                    || contact.name().formattedName().isBlank()) {
+                return new IllegalArgumentException("Each contact must have a name with a non-empty formatted_name.");
+            }
         }
 
         return null;

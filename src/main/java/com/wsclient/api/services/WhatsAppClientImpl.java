@@ -14,11 +14,16 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.util.List;
+
 import com.wsclient.api.business.request.BusinessProfile;
 import com.wsclient.api.business.response.BusinessProfileResponse;
+import com.wsclient.api.messages.request.Location;
 import com.wsclient.api.messages.request.Media;
+import com.wsclient.api.messages.request.Reaction;
 import com.wsclient.api.messages.request.Template;
 import com.wsclient.api.messages.request.Text;
+import com.wsclient.api.messages.request.contact.Contact;
 import com.wsclient.api.messages.request.interactive.Interactive;
 import com.wsclient.api.messages.response.WhatsAppResponse;
 import com.wsclient.api.validators.ConfigValidator;
@@ -76,6 +81,94 @@ public class WhatsAppClientImpl implements WhatsAppClient {
                 "messaging_product", "whatsapp",
                 "to", to,
                 "text", text);
+
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                return whatsAppService.sendRequest(data, "messages");
+            } catch (Exception e) {
+                throw new CompletionException(e);
+            }
+        });
+    }
+
+    @Override
+    public CompletableFuture<WhatsAppResponse> sendStickerAsync(String to, Media sticker) {
+        final IllegalArgumentException exception = validateStickerInput(to, sticker);
+        if (exception != null) {
+            return CompletableFuture.failedFuture(exception);
+        }
+
+        Map<String, Object> data = Map.of(
+                "messaging_product", "whatsapp",
+                "to", to,
+                "type", "sticker",
+                "sticker", sticker);
+
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                return whatsAppService.sendRequest(data, "messages");
+            } catch (Exception e) {
+                throw new CompletionException(e);
+            }
+        });
+    }
+
+    @Override
+    public CompletableFuture<WhatsAppResponse> sendLocationAsync(String to, Location location) {
+        final IllegalArgumentException exception = validateLocationInput(to, location);
+        if (exception != null) {
+            return CompletableFuture.failedFuture(exception);
+        }
+
+        Map<String, Object> data = Map.of(
+                "messaging_product", "whatsapp",
+                "to", to,
+                "type", "location",
+                "location", location);
+
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                return whatsAppService.sendRequest(data, "messages");
+            } catch (Exception e) {
+                throw new CompletionException(e);
+            }
+        });
+    }
+
+    @Override
+    public CompletableFuture<WhatsAppResponse> sendReactionAsync(String to, Reaction reaction) {
+        final IllegalArgumentException exception = validateReactionInput(to, reaction);
+        if (exception != null) {
+            return CompletableFuture.failedFuture(exception);
+        }
+
+        Map<String, Object> data = Map.of(
+                "messaging_product", "whatsapp",
+                "to", to,
+                "type", "reaction",
+                "reaction", reaction);
+
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                return whatsAppService.sendRequest(data, "messages");
+            } catch (Exception e) {
+                throw new CompletionException(e);
+            }
+        });
+    }
+
+    @Override
+    public CompletableFuture<WhatsAppResponse> sendContactsAsync(String to, List<Contact> contacts) {
+        final IllegalArgumentException exception = validateContactsInput(to, contacts);
+        if (exception != null) {
+            return CompletableFuture.failedFuture(exception);
+        }
+
+        Map<String, Object> data = Map.of(
+                "messaging_product", "whatsapp",
+                "to", to,
+                "type", "contacts",
+                "contacts", contacts);
 
         return CompletableFuture.supplyAsync(() -> {
             try {

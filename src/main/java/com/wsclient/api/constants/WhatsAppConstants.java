@@ -51,6 +51,26 @@ public final class WhatsAppConstants {
     public static final int INTERACTIVE_MAX_ROW_DESCRIPTION_LENGTH = 72;
 
     /**
+     * The minimum valid value for a location's latitude.
+     */
+    public static final double LOCATION_MIN_LATITUDE = -90;
+
+    /**
+     * The maximum valid value for a location's latitude.
+     */
+    public static final double LOCATION_MAX_LATITUDE = 90;
+
+    /**
+     * The minimum valid value for a location's longitude.
+     */
+    public static final double LOCATION_MIN_LONGITUDE = -180;
+
+    /**
+     * The maximum valid value for a location's longitude.
+     */
+    public static final double LOCATION_MAX_LONGITUDE = 180;
+
+    /**
      * Private constructor to prevent instantiation of this utility class.
      */
     private WhatsAppConstants() {

@@ -12,6 +12,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletionException;
 
@@ -21,9 +22,14 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import com.wsclient.api.messages.factory.InteractiveFactory;
+import com.wsclient.api.messages.request.Location;
 import com.wsclient.api.messages.request.Media;
+import com.wsclient.api.messages.request.Reaction;
 import com.wsclient.api.messages.request.Text;
+import com.wsclient.api.messages.request.contact.Contact;
+import com.wsclient.api.messages.request.contact.ContactName;
 import com.wsclient.api.messages.request.interactive.Interactive;
+import com.wsclient.api.messages.request.interactive.Interactive.InteractiveType;
 import com.wsclient.api.messages.response.WhatsAppResponse;
 import com.wsclient.api.services.WhatsAppClient;
 import com.wsclient.api.services.WhatsAppClientImpl;
@@ -762,5 +768,272 @@ public class WhatsAppClientTest {
 
                 assertEquals(expectedResponse, actualResponse);
                 verify(whatsAppService, times(1)).sendRequest(expectedData, "messages");
+        }
+
+        // ===========================
+        // STICKER MESSAGES
+        // ===========================
+
+        @Test
+        void sendStickerAsync_ShouldFail_WhenNoIdOrLinkProvided() {
+                Media sticker = Media.builder().build();
+
+                CompletionException ex = assertThrows(CompletionException.class,
+                                () -> whatsAppClient.sendStickerAsync("573001112233", sticker).join());
+
+                assertInstanceOf(IllegalArgumentException.class, ex.getCause());
+                assertEquals("Media must have either an 'id' or a 'link' defined.", ex.getCause().getMessage());
+        }
+
+        @Test
+        void sendStickerAsync_ShouldFail_WhenFilenameProvided() {
+                Media sticker = Media.builder()
+                                .link("https://example.com/sticker.webp")
+                                .filename("sticker.webp")
+                                .build();
+
+                CompletionException ex = assertThrows(CompletionException.class,
+                                () -> whatsAppClient.sendStickerAsync("573001112233", sticker).join());
+
+                assertInstanceOf(IllegalArgumentException.class, ex.getCause());
+                assertEquals("Filename is not allowed for sticker messages.", ex.getCause().getMessage());
+        }
+
+        @Test
+        void sendStickerAsync_ShouldFail_WhenCaptionProvided() {
+                Media sticker = Media.builder()
+                                .link("https://example.com/sticker.webp")
+                                .caption("Not allowed")
+                                .build();
+
+                CompletionException ex = assertThrows(CompletionException.class,
+                                () -> whatsAppClient.sendStickerAsync("573001112233", sticker).join());
+
+                assertInstanceOf(IllegalArgumentException.class, ex.getCause());
+                assertEquals("Caption is not allowed for sticker messages.", ex.getCause().getMessage());
+        }
+
+        @Test
+        void sendStickerAsync_ShouldReturnResponse_WhenRequestIsSuccessful()
+                        throws IOException, InterruptedException, WhatsAppException {
+                final String validTo = "573001112233";
+                final Media sticker = Media.builder().link("https://example.com/sticker.webp").build();
+
+                final WhatsAppResponse expectedResponse = new WhatsAppResponse(validTo, null, null);
+
+                Map<String, Object> expectedData = Map.of(
+                                "messaging_product", "whatsapp",
+                                "to", validTo,
+                                "type", "sticker",
+                                "sticker", sticker);
+
+                when(whatsAppService.sendRequest(expectedData, "messages")).thenReturn(expectedResponse);
+
+                WhatsAppResponse actualResponse = whatsAppClient.sendStickerAsync(validTo, sticker).join();
+
+                assertEquals(expectedResponse, actualResponse);
+                verify(whatsAppService, times(1)).sendRequest(expectedData, "messages");
+        }
+
+        // ===========================
+        // LOCATION MESSAGES
+        // ===========================
+
+        @Test
+        void sendLocationAsync_ShouldFail_WhenLocationIsNull() {
+                CompletionException ex = assertThrows(CompletionException.class,
+                                () -> whatsAppClient.sendLocationAsync("573001112233", null).join());
+
+                assertInstanceOf(IllegalArgumentException.class, ex.getCause());
+                assertEquals("Location object cannot be null.", ex.getCause().getMessage());
+        }
+
+        @Test
+        void sendLocationAsync_ShouldFail_WhenLatitudeIsNotNumeric() {
+                Location location = Location.builder().latitude("not-a-number").longitude("10").build();
+
+                CompletionException ex = assertThrows(CompletionException.class,
+                                () -> whatsAppClient.sendLocationAsync("573001112233", location).join());
+
+                assertInstanceOf(IllegalArgumentException.class, ex.getCause());
+                assertEquals("Location latitude must be a valid number.", ex.getCause().getMessage());
+        }
+
+        @Test
+        void sendLocationAsync_ShouldFail_WhenLatitudeOutOfRange() {
+                Location location = Location.builder().latitude("95").longitude("10").build();
+
+                CompletionException ex = assertThrows(CompletionException.class,
+                                () -> whatsAppClient.sendLocationAsync("573001112233", location).join());
+
+                assertInstanceOf(IllegalArgumentException.class, ex.getCause());
+                assertEquals("Location latitude must be between -90.0 and 90.0.", ex.getCause().getMessage());
+        }
+
+        @Test
+        void sendLocationAsync_ShouldFail_WhenLongitudeOutOfRange() {
+                Location location = Location.builder().latitude("10").longitude("200").build();
+
+                CompletionException ex = assertThrows(CompletionException.class,
+                                () -> whatsAppClient.sendLocationAsync("573001112233", location).join());
+
+                assertInstanceOf(IllegalArgumentException.class, ex.getCause());
+                assertEquals("Location longitude must be between -180.0 and 180.0.", ex.getCause().getMessage());
+        }
+
+        @Test
+        void sendLocationAsync_ShouldReturnResponse_WhenRequestIsSuccessful()
+                        throws IOException, InterruptedException, WhatsAppException {
+                final String validTo = "573001112233";
+                final Location location = Location.builder()
+                                .latitude("4.710989")
+                                .longitude("-74.072092")
+                                .name("Bogotá")
+                                .build();
+
+                final WhatsAppResponse expectedResponse = new WhatsAppResponse(validTo, null, null);
+
+                Map<String, Object> expectedData = Map.of(
+                                "messaging_product", "whatsapp",
+                                "to", validTo,
+                                "type", "location",
+                                "location", location);
+
+                when(whatsAppService.sendRequest(expectedData, "messages")).thenReturn(expectedResponse);
+
+                WhatsAppResponse actualResponse = whatsAppClient.sendLocationAsync(validTo, location).join();
+
+                assertEquals(expectedResponse, actualResponse);
+                verify(whatsAppService, times(1)).sendRequest(expectedData, "messages");
+        }
+
+        // ===========================
+        // REACTION MESSAGES
+        // ===========================
+
+        @Test
+        void sendReactionAsync_ShouldFail_WhenReactionIsNull() {
+                CompletionException ex = assertThrows(CompletionException.class,
+                                () -> whatsAppClient.sendReactionAsync("573001112233", null).join());
+
+                assertInstanceOf(IllegalArgumentException.class, ex.getCause());
+                assertEquals("Reaction object cannot be null.", ex.getCause().getMessage());
+        }
+
+        @Test
+        void sendReactionAsync_ShouldFail_WhenMessageIdIsMissing() {
+                Reaction reaction = Reaction.builder().emoji("👍").build();
+
+                CompletionException ex = assertThrows(CompletionException.class,
+                                () -> whatsAppClient.sendReactionAsync("573001112233", reaction).join());
+
+                assertInstanceOf(IllegalArgumentException.class, ex.getCause());
+                assertEquals("Reaction message ID cannot be null or empty.", ex.getCause().getMessage());
+        }
+
+        @Test
+        void sendReactionAsync_ShouldSucceed_WhenEmojiIsEmpty_ToRemoveReaction()
+                        throws IOException, InterruptedException, WhatsAppException {
+                final String validTo = "573001112233";
+                final Reaction reaction = Reaction.builder().message_id("wamid.EXAMPLE").emoji("").build();
+
+                final WhatsAppResponse expectedResponse = new WhatsAppResponse(validTo, null, null);
+
+                Map<String, Object> expectedData = Map.of(
+                                "messaging_product", "whatsapp",
+                                "to", validTo,
+                                "type", "reaction",
+                                "reaction", reaction);
+
+                when(whatsAppService.sendRequest(expectedData, "messages")).thenReturn(expectedResponse);
+
+                WhatsAppResponse actualResponse = whatsAppClient.sendReactionAsync(validTo, reaction).join();
+
+                assertEquals(expectedResponse, actualResponse);
+                verify(whatsAppService, times(1)).sendRequest(expectedData, "messages");
+        }
+
+        @Test
+        void sendReactionAsync_ShouldReturnResponse_WhenRequestIsSuccessful()
+                        throws IOException, InterruptedException, WhatsAppException {
+                final String validTo = "573001112233";
+                final Reaction reaction = Reaction.builder().message_id("wamid.EXAMPLE").emoji("👍").build();
+
+                final WhatsAppResponse expectedResponse = new WhatsAppResponse(validTo, null, null);
+
+                Map<String, Object> expectedData = Map.of(
+                                "messaging_product", "whatsapp",
+                                "to", validTo,
+                                "type", "reaction",
+                                "reaction", reaction);
+
+                when(whatsAppService.sendRequest(expectedData, "messages")).thenReturn(expectedResponse);
+
+                WhatsAppResponse actualResponse = whatsAppClient.sendReactionAsync(validTo, reaction).join();
+
+                assertEquals(expectedResponse, actualResponse);
+                verify(whatsAppService, times(1)).sendRequest(expectedData, "messages");
+        }
+
+        // ===========================
+        // CONTACT MESSAGES
+        // ===========================
+
+        @Test
+        void sendContactsAsync_ShouldFail_WhenContactsIsEmpty() {
+                CompletionException ex = assertThrows(CompletionException.class,
+                                () -> whatsAppClient.sendContactsAsync("573001112233", List.of()).join());
+
+                assertInstanceOf(IllegalArgumentException.class, ex.getCause());
+                assertEquals("Contacts message must contain at least one contact.", ex.getCause().getMessage());
+        }
+
+        @Test
+        void sendContactsAsync_ShouldFail_WhenFormattedNameIsMissing() {
+                Contact contact = new Contact(null, null, null,
+                                new ContactName(null, "John", "Doe", null, null, null),
+                                null, null, null);
+
+                CompletionException ex = assertThrows(CompletionException.class,
+                                () -> whatsAppClient.sendContactsAsync("573001112233", List.of(contact)).join());
+
+                assertInstanceOf(IllegalArgumentException.class, ex.getCause());
+                assertEquals("Each contact must have a name with a non-empty formatted_name.",
+                                ex.getCause().getMessage());
+        }
+
+        @Test
+        void sendContactsAsync_ShouldReturnResponse_WhenRequestIsSuccessful()
+                        throws IOException, InterruptedException, WhatsAppException {
+                final String validTo = "573001112233";
+                final Contact contact = new Contact(null, null, null,
+                                new ContactName("John Doe", "John", "Doe", null, null, null),
+                                null, null, null);
+                final List<Contact> contacts = List.of(contact);
+
+                final WhatsAppResponse expectedResponse = new WhatsAppResponse(validTo, null, null);
+
+                Map<String, Object> expectedData = Map.of(
+                                "messaging_product", "whatsapp",
+                                "to", validTo,
+                                "type", "contacts",
+                                "contacts", contacts);
+
+                when(whatsAppService.sendRequest(expectedData, "messages")).thenReturn(expectedResponse);
+
+                WhatsAppResponse actualResponse = whatsAppClient.sendContactsAsync(validTo, contacts).join();
+
+                assertEquals(expectedResponse, actualResponse);
+                verify(whatsAppService, times(1)).sendRequest(expectedData, "messages");
+        }
+
+        // ===========================
+        // INTERACTIVE TYPE ENUM
+        // ===========================
+
+        @Test
+        void interactiveType_ProductListValue_ShouldNotCollideWithProduct() {
+                assertEquals("product_list", InteractiveType.PRODUCT_LIST.getValue());
+                assertEquals("product", InteractiveType.PRODUCT.getValue());
         }
 }
