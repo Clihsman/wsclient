@@ -124,6 +124,52 @@ public class WhatsAppClientTest {
                 verify(whatsAppService, times(1)).sendRequest(requestData, "messages");
         }
 
+        @Test
+        void sendTextAsync_ShouldIncludeContext_WhenReplyingToAMessage()
+                        throws IOException, InterruptedException, WhatsAppException {
+                final String validPhoneNumber = "3001111222";
+                final String replyToMessageId = "wamid.HBgMNTczMTE0OTA4NTMy";
+                final Text exampleText = Text.builder().body("Example Body").build();
+                final WhatsAppResponse expectedResponse = new WhatsAppResponse(validPhoneNumber, null, null);
+
+                Map<String, Object> expectedData = Map.of(
+                                "messaging_product", "whatsapp",
+                                "to", validPhoneNumber,
+                                "context", Map.of("message_id", replyToMessageId),
+                                "text", exampleText);
+
+                when(whatsAppService.sendRequest(expectedData, "messages")).thenReturn(expectedResponse);
+
+                final WhatsAppResponse actualResponse = whatsAppClient
+                                .sendTextAsync(validPhoneNumber, exampleText, replyToMessageId)
+                                .join();
+
+                assertEquals(expectedResponse, actualResponse);
+                verify(whatsAppService, times(1)).sendRequest(expectedData, "messages");
+        }
+
+        @Test
+        void sendTextAsync_ShouldOmitContext_WhenReplyToMessageIdIsNull()
+                        throws IOException, InterruptedException, WhatsAppException {
+                final String validPhoneNumber = "3001111222";
+                final Text exampleText = Text.builder().body("Example Body").build();
+                final WhatsAppResponse expectedResponse = new WhatsAppResponse(validPhoneNumber, null, null);
+
+                Map<String, Object> expectedData = Map.of(
+                                "messaging_product", "whatsapp",
+                                "to", validPhoneNumber,
+                                "text", exampleText);
+
+                when(whatsAppService.sendRequest(expectedData, "messages")).thenReturn(expectedResponse);
+
+                final WhatsAppResponse actualResponse = whatsAppClient
+                                .sendTextAsync(validPhoneNumber, exampleText, null)
+                                .join();
+
+                assertEquals(expectedResponse, actualResponse);
+                verify(whatsAppService, times(1)).sendRequest(expectedData, "messages");
+        }
+
         // ===========================
         // INTERACTIVE MESSAGES (BUTTONS)
         // ===========================

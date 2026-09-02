@@ -1,5 +1,7 @@
 package com.wsclient.api.webhook;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 
@@ -7,12 +9,15 @@ import com.fasterxml.jackson.annotation.JsonValue;
  * The <code>statuses</code> object informs you of the status of messages
  * between you, users,
  * and/or groups.
- * 
+ *
  * @param id          id
  * @param recipientId recipientId
  * @param status      status
  * @param timestamp   timestamp
  * @param type        type
+ * @param errors      Present only when {@code status} is {@code failed} — the
+ *                    reason(s) delivery failed (e.g. the media link could not
+ *                    be downloaded).
  */
 public record Statuses(
         /**
@@ -44,7 +49,29 @@ public record Statuses(
          * Cloud API developers will not receive this field.
          * </p>
          */
-        String type) {
+        String type,
+        List<StatusError> errors) {
+
+    /**
+     * One reason a message delivery failed, as reported by Meta on a
+     * {@code status: "failed"} webhook.
+     *
+     * @param code      Meta's numeric error code (e.g. 131053 = media upload
+     *                  error, usually meaning the media link could not be
+     *                  fetched).
+     * @param title     Short error title.
+     * @param message   Human-readable error message.
+     * @param errorData Extra detail, when Meta provides it.
+     */
+    public record StatusError(
+            Integer code,
+            String title,
+            String message,
+            @JsonProperty("error_data") ErrorData errorData) {
+
+        public record ErrorData(String details) {
+        }
+    }
     /**
      * Status
      */

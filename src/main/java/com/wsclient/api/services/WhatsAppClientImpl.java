@@ -72,15 +72,23 @@ public class WhatsAppClientImpl implements WhatsAppClient {
 
     @Override
     public CompletableFuture<WhatsAppResponse> sendTextAsync(String to, Text text) {
+        return sendTextAsync(to, text, null);
+    }
+
+    @Override
+    public CompletableFuture<WhatsAppResponse> sendTextAsync(String to, Text text, String replyToMessageId) {
         final IllegalArgumentException exception = validateTextInput(to, text);
         if (exception != null) {
             return CompletableFuture.failedFuture(exception);
         }
 
-        Map<String, Object> data = Map.of(
-                "messaging_product", "whatsapp",
-                "to", to,
-                "text", text);
+        Map<String, Object> data = new java.util.LinkedHashMap<>();
+        data.put("messaging_product", "whatsapp");
+        data.put("to", to);
+        if (replyToMessageId != null && !replyToMessageId.isBlank()) {
+            data.put("context", Map.of("message_id", replyToMessageId));
+        }
+        data.put("text", text);
 
         return CompletableFuture.supplyAsync(() -> {
             try {

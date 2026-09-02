@@ -62,6 +62,20 @@ public interface WhatsAppClient {
         public CompletableFuture<WhatsAppResponse> sendTextAsync(String to, Text text);
 
         /**
+         * Sends a WhatsApp text message as a reply to a previous message, so it
+         * renders as a quoted reply in the recipient's WhatsApp app.
+         *
+         * @param to               The recipient's phone number in international format.
+         * @param text             The text message to send.
+         * @param replyToMessageId The {@code wamid} of the message being replied to
+         *                         (as returned by a previous send, or received on an
+         *                         inbound webhook). {@code null} behaves exactly like
+         *                         {@link #sendTextAsync(String, Text)}.
+         * @return A WhatsAppResponse object containing the API response.
+         */
+        public CompletableFuture<WhatsAppResponse> sendTextAsync(String to, Text text, String replyToMessageId);
+
+        /**
          * Sends a WhatsApp image message to a specified recipient.
          *
          * @param to    The recipient's phone number in international format.
