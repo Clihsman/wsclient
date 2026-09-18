@@ -61,9 +61,23 @@ import com.wsclient.api.messages.request.interactive.Interactive.InteractiveType
 public final class WhatsAppInputValidator {
 
     /**
+     * A recipient is normally a plain-digit phone number (e.g.
+     * {@code "573001112233"}). For a contact that's new to a given business
+     * phone number, WhatsApp may instead identify them with a business-scoped
+     * id shaped like {@code "CO.27917137097968166"} (a short letter prefix, a
+     * dot, then digits) until enough messages have been exchanged — that id is
+     * just as valid a {@code to} value as a phone number.
+     */
+    private static final String RECIPIENT_PATTERN = "\\d+|[A-Za-z]{2,4}\\.\\d+";
+
+    /**
      * WhatsAppInputValidator
      */
     private WhatsAppInputValidator() {
+    }
+
+    private static boolean isInvalidRecipient(String to) {
+        return !to.matches(RECIPIENT_PATTERN);
     }
 
     /**
@@ -92,7 +106,7 @@ public final class WhatsAppInputValidator {
 
         final String message = text.getBody().trim();
 
-        if (!to.matches("\\d+")) {
+        if (isInvalidRecipient(to)) {
             return new IllegalArgumentException(
                     "Invalid recipient number. The 'to' field must contain only digits.");
         }
@@ -128,7 +142,7 @@ public final class WhatsAppInputValidator {
             return new IllegalArgumentException("Recipient number cannot be null.");
         }
 
-        if (!to.matches("\\d+")) {
+        if (isInvalidRecipient(to)) {
             return new IllegalArgumentException(
                     "Invalid recipient number. The 'to' field must contain only digits.");
         }
@@ -622,7 +636,7 @@ public final class WhatsAppInputValidator {
             return new IllegalArgumentException("Recipient number cannot be null.");
         }
 
-        if (!to.matches("\\d+")) {
+        if (isInvalidRecipient(to)) {
             return new IllegalArgumentException("Invalid recipient number. The 'to' field must contain only digits.");
         }
 
@@ -835,7 +849,7 @@ public final class WhatsAppInputValidator {
             return new IllegalArgumentException("Recipient number cannot be null.");
         }
 
-        if (!to.matches("\\d+")) {
+        if (isInvalidRecipient(to)) {
             return new IllegalArgumentException("Invalid recipient number. The 'to' field must contain only digits.");
         }
 
@@ -898,7 +912,7 @@ public final class WhatsAppInputValidator {
             return new IllegalArgumentException("Recipient number cannot be null.");
         }
 
-        if (!to.matches("\\d+")) {
+        if (isInvalidRecipient(to)) {
             return new IllegalArgumentException("Invalid recipient number. The 'to' field must contain only digits.");
         }
 
@@ -935,7 +949,7 @@ public final class WhatsAppInputValidator {
             return new IllegalArgumentException("Recipient number cannot be null.");
         }
 
-        if (!to.matches("\\d+")) {
+        if (isInvalidRecipient(to)) {
             return new IllegalArgumentException("Invalid recipient number. The 'to' field must contain only digits.");
         }
 
@@ -980,7 +994,7 @@ public final class WhatsAppInputValidator {
             return new IllegalArgumentException("Recipient number cannot be null.");
         }
 
-        if (!to.matches("\\d+")) {
+        if (isInvalidRecipient(to)) {
             return new IllegalArgumentException("Invalid recipient number. The 'to' field must contain only digits.");
         }
 
