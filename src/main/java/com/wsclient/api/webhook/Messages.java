@@ -1,13 +1,15 @@
 package com.wsclient.api.webhook;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 
 /**
  * The messages array of objects is nested within the Value object and is
  * triggered when a customer updates their profile information or a customer
  * sends a message to the business that is subscribed to the Webhook.
- * 
+ *
  * @param from        from
+ * @param fromUserId  fromUserId
  * @param id          id
  * @param timestamp   timestamp
  * @param type        type
@@ -29,6 +31,19 @@ public record Messages(
          * The customer's phone number.
          */
         String from,
+        /**
+         * <strong>
+         * Sent instead of {@code from} for a contact that is new to this business
+         * phone number.
+         * </strong>
+         * <p>
+         * A business-scoped identifier (e.g. {@code "CO.<digits>"}) that Meta uses
+         * in place of the phone number until the contact has exchanged enough
+         * messages — usable the same way {@code from} would be (e.g. to reply).
+         * Matches {@link Contacts#userId()} for the same message.
+         * </p>
+         */
+        @JsonProperty("from_user_id") String fromUserId,
         /**
          * The unique identifier of incoming message, you can use messages endpoint to
          * mark it as read.

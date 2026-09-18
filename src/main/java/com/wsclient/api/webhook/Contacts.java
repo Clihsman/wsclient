@@ -17,6 +17,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  *
  * @param profile profile
  * @param waId    waId
+ * @param userId  userId
  */
 public record Contacts(
         /**
@@ -28,7 +29,13 @@ public record Contacts(
          * sending messages back, whether or not it happens to be their phone
          * number.
          */
-        @JsonProperty("wa_id") String waId) {
+        @JsonProperty("wa_id") String waId,
+        /**
+         * Sent instead of {@code wa_id} for a contact that is new to this business
+         * phone number — see {@link Messages#fromUserId()}, which carries the same
+         * value for the matching message.
+         */
+        @JsonProperty("user_id") String userId) {
 
     /**
      * Profile
