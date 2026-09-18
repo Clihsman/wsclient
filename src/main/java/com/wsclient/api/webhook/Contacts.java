@@ -40,12 +40,24 @@ public record Contacts(
     /**
      * Profile
      *
-     * @param name name
+     * @param name     name
+     * @param username username
      */
     public record Profile(
             /**
-             * The customer's name, as configured in their WhatsApp profile.
+             * The customer's display name, as configured in their WhatsApp profile.
              */
-            String name) {
+            String name,
+            /**
+             * <strong>
+             * Added for a contact that is new to this business phone number.
+             * </strong>
+             * <p>
+             * The customer's WhatsApp username/handle — sent alongside
+             * {@link Contacts#userId()} while the contact is still identified by a
+             * business-scoped id rather than a phone number.
+             * </p>
+             */
+            String username) {
     }
 }
