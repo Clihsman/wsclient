@@ -38,4 +38,28 @@ public class WhatsAppResponseTest {
         assertEquals("wamid.HBg=", response.messages().get(0).id());
         assertEquals("accepted", response.messages().get(0).messageStatus());
     }
+
+    // Enviar a un Business-Scoped User ID (contacto nuevo, ver Contacts#userId
+    // del lado del webhook) hace que Meta responda con "user_id" en vez de
+    // "wa_id" en contacts — sin este campo, la respuesta de un envio exitoso
+    // no se podia parsear y el mensaje nunca se guardaba localmente aunque
+    // WhatsApp ya lo hubiera entregado.
+    @Test
+    void deserializesContactsUserIdFromSnakeCaseJson() throws Exception {
+        String body = """
+                {
+                  "messaging_product": "whatsapp",
+                  "contacts": [
+                    {"input": "CO.27917137097968166", "user_id": "CO.27917137097968166"}
+                  ],
+                  "messages": [
+                    {"id": "wamid.HBg=", "message_status": "accepted"}
+                  ]
+                }
+                """;
+
+        WhatsAppResponse response = mapper.readValue(body, WhatsAppResponse.class);
+
+        assertEquals("CO.27917137097968166", response.contacts().get(0).userId());
+    }
 }
