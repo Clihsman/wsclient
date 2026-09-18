@@ -84,7 +84,15 @@ public class WhatsAppClientImpl implements WhatsAppClient {
 
         Map<String, Object> data = new java.util.LinkedHashMap<>();
         data.put("messaging_product", "whatsapp");
-        data.put("to", to);
+        // Un Business-Scoped User ID (contacto nuevo, ver isBusinessScopedId) va
+        // en 'recipient', nunca en 'to' — mandarlo en 'to' pasa la validacion
+        // pero Meta lo rechaza en la entrega con "131026 Message undeliverable"
+        // al no poder resolverlo como telefono.
+        if (isBusinessScopedId(to)) {
+            data.put("recipient", to);
+        } else {
+            data.put("to", to);
+        }
         if (replyToMessageId != null && !replyToMessageId.isBlank()) {
             data.put("context", Map.of("message_id", replyToMessageId));
         }

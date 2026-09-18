@@ -170,6 +170,26 @@ public class WhatsAppClientTest {
                 verify(whatsAppService, times(1)).sendRequest(expectedData, "messages");
         }
 
+        @Test
+        void sendTextAsync_ShouldUseRecipientField_WhenToIsABusinessScopedId()
+                        throws IOException, InterruptedException, WhatsAppException {
+                final String bsuid = "CO.27917137097968166";
+                final Text exampleText = Text.builder().body("Example Body").build();
+                final WhatsAppResponse expectedResponse = new WhatsAppResponse(bsuid, null, null);
+
+                Map<String, Object> expectedData = Map.of(
+                                "messaging_product", "whatsapp",
+                                "recipient", bsuid,
+                                "text", exampleText);
+
+                when(whatsAppService.sendRequest(expectedData, "messages")).thenReturn(expectedResponse);
+
+                final WhatsAppResponse actualResponse = whatsAppClient.sendTextAsync(bsuid, exampleText).join();
+
+                assertEquals(expectedResponse, actualResponse);
+                verify(whatsAppService, times(1)).sendRequest(expectedData, "messages");
+        }
+
         // ===========================
         // INTERACTIVE MESSAGES (BUTTONS)
         // ===========================

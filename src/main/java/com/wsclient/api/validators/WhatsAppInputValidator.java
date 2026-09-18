@@ -62,13 +62,15 @@ public final class WhatsAppInputValidator {
 
     /**
      * A recipient is normally a plain-digit phone number (e.g.
-     * {@code "573001112233"}). For a contact that's new to a given business
-     * phone number, WhatsApp may instead identify them with a business-scoped
-     * id shaped like {@code "CO.27917137097968166"} (a short letter prefix, a
-     * dot, then digits) until enough messages have been exchanged — that id is
-     * just as valid a {@code to} value as a phone number.
+     * {@code "573001112233"}). Meta's Business-Scoped User ID (BSUID) feature
+     * identifies a contact that's new to a given business phone number with
+     * an id shaped like {@code "CO.27917137097968166"} (country code, a dot,
+     * then alphanumeric characters) instead, until enough messages have been
+     * exchanged — see {@link #isBusinessScopedId(String)}.
      */
-    private static final String RECIPIENT_PATTERN = "\\d+|[A-Za-z]{2,4}\\.\\d+";
+    private static final String BSUID_PATTERN = "[A-Za-z]{2,4}\\.[A-Za-z0-9]+";
+
+    private static final String RECIPIENT_PATTERN = "\\d+|" + BSUID_PATTERN;
 
     /**
      * WhatsAppInputValidator
@@ -78,6 +80,17 @@ public final class WhatsAppInputValidator {
 
     private static boolean isInvalidRecipient(String to) {
         return !to.matches(RECIPIENT_PATTERN);
+    }
+
+    /**
+     * Whether {@code to} is a Business-Scoped User ID (e.g.
+     * {@code "CO.27917137097968166"}) rather than a plain phone number. Per
+     * Meta's docs, a BSUID must be sent to the Send Message API in the
+     * {@code recipient} field — never {@code to}, and always with the full
+     * value (country code, dot, and every alphanumeric character intact).
+     */
+    public static boolean isBusinessScopedId(String to) {
+        return to != null && to.matches(BSUID_PATTERN);
     }
 
     /**
