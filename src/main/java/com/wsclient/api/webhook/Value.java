@@ -11,6 +11,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @param metadata         metadata
  * @param messages         messages
  * @param statuses         statuses
+ * @param contacts         contacts
  */
 public record Value(
                 /**
@@ -31,6 +32,11 @@ public record Value(
                  * An array of message status objects. Added to Webhooks for message status
                  * update.
                  */
-                List<Statuses> statuses) {
+                List<Statuses> statuses,
+                /**
+                 * An array of contact objects, one per entry in {@code messages} — see
+                 * {@link Contacts}. Added to Webhooks for incoming message notifications.
+                 */
+                List<Contacts> contacts) {
 
 }
